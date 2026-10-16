@@ -44,7 +44,7 @@ The test pyramid is applied: many fast unit tests at the base, fewer integration
 
 | **Level** | **Objective** | **Tool** | **Target** |
 |---|---|---|---|
-| Unit | Domain logic and use cases in isolation, with fake repositories | node:test (Node.js 20) | ≥ 80% of lines; ≥ 90% in domain/ |
+| Unit | Domain logic and use cases in isolation, with fake repositories | node:test (backend); Jest + jest-expo (frontend) | ≥ 80% of lines; ≥ 90% in domain/ |
 | Integration | Adapters with real PostgreSQL, MongoDB, and RabbitMQ | node:test + Docker Compose | Happy path and 2–3 errors per adapter |
 | Contract | HTTP responses comply with the OpenAPI contract | YAML contracts from 07-api | 100% of public routes |
 | End-to-end | Complete user flows through the gateway | Docker Compose + HTTP client / manual test | Critical flows |
@@ -56,15 +56,15 @@ The test pyramid is applied: many fast unit tests at the base, fewer integration
 
 ## Items to test
 
-- api-gateway and the five microservices (branch feat/microservices-split, commit 5a91e66).
+- api-gateway and the five microservices (branch develop, commit 2993301).
 
 - Shared package @traduce/shared.
 
-- Client application on Android and in a desktop browser.
+- Client application on Android and in a desktop browser, with unit tests for its logic: validations, API client, authentication flows, and recognition (branch chore/frontend-unit-tests).
 
 ## Items out of scope for this iteration
 
-- Load tests on a production server (does not exist yet).
+- Load tests on the production server (traducesenas.tech), so as not to affect users.
 
 - Publication in application stores.
 
@@ -105,36 +105,39 @@ The test pyramid is applied: many fast unit tests at the base, fewer integration
 
 # Results of the automated tests
 
-The automated backend suite was run with “npm test”, which builds the shared package and runs the tests of all services with the native Node.js test runner. The result was as follows:
+The automated suites were run with “npm test” in each repository. In the backend, the command builds the shared package and runs the tests of all services with the native Node.js test runner; in the frontend, it runs Jest with the Expo preset (jest-expo). The result was as follows:
 
 **Table 4**
 
-*Summary of the automated run of October 7, 2026*
+*Summary of the automated run of October 16, 2026*
 
-| **Indicator** | **Value** |
-|---|---|
-| Tests executed | 494 |
-| Suites (groups) | 115 |
-| Passed | 494 |
-| Failed | 0 |
-| Skipped / cancelled | 0 / 0 |
-| Total duration | 87 seconds |
+| **Indicator** | **Backend** | **Frontend** |
+|---|---|---|
+| Tests executed | 683 | 79 |
+| Suites (groups) | 141 | 8 |
+| Passed | 681 | 79 |
+| Failed | 0 | 0 |
+| Skipped / cancelled | 2 / 0 | 0 / 0 |
+| Total duration | 22 seconds | 3 seconds |
 
-*Note.* Output of “npm test” on branch feat/microservices-split, commit 5a91e66.
+*Note.* Backend: branch develop, commit 2993301; the 2 skipped tests need a test PostgreSQL database (variable PROFILE_TEST_DATABASE_URL). Frontend: branch chore/frontend-unit-tests, commit 6219c0d.
 
 **Table 5**
 
 *Test coverage by component*
 
-| **Component** | **Test files** | **Aspects verified** |
-|---|---|---|
-| @traduce/shared | 5 | JWT provider, authMiddleware, requireRole, requirePermission, error handler, configuration, event validators, exponential retry, in-memory bus, and RabbitMQ |
-| api-gateway | 1 | Prefix-based routing, CORS with allowlist, configuration, public routes |
-| iam-service | 22 | Registration with email verification, login according to status, password recovery, JWT with roles and permissions, account change and deletion, email templates |
-| recognition-service | 11 | Translations, history, sign templates (ADMIN only), samples, and consumption of lexicon events with contract |
-| lexicon-service | 6 | Catalog, alphabet, search, categories, publication, and withdrawal of signs |
-| analytics-service | 4 | Event logging, reports, and event handlers |
-| profile-service | 4 | Profile, preferences, notifications, and achievements |
+| **Component** | **Test files** | **Aspects verified** | **Line coverage** |
+|---|---|---|---|
+| @traduce/shared | 5 | JWT provider, authMiddleware, requireRole, requirePermission, error handler, configuration, event validators, exponential retry, in-memory bus, and RabbitMQ | 99.5% |
+| api-gateway | 1 | Prefix-based routing, CORS with allowlist, configuration, public routes, rate limiting | 100% |
+| iam-service | 30 | Registration with email verification, login according to status and with Google or Facebook, password recovery, JWT with roles and permissions, account change and deletion (also with an email code), event delivery through an outbox, email templates | 89.3% |
+| recognition-service | 13 | Translations, history, sign templates (ADMIN only), samples, consumption of lexicon events with contract, and rejection of writes from deleted accounts | 86.0% |
+| lexicon-service | 5 | Catalog, alphabet, search, categories, publication, and withdrawal of signs | 83.5% |
+| analytics-service | 6 | Event logging, reports, event handlers, and atomic erasure of an account's data | 95.1% |
+| profile-service | 11 | Profile, preferences with permissions and creation of a missing profile, notifications, achievements under concurrent updates, account deletion, and profile recovery | 83.5% |
+| Frontend (client application) | 8 | Email and password validation, API client (errors, token sent only to the API, single expired-session notice), confirm-email and password-recovery flows, resend countdown, hand normalization, and KNN classifier | 4.5% |
+
+*Note.* Line coverage measured on October 16, 2026 with the built-in node:test coverage in the backend (88.5% in total) and with “jest --coverage” in the frontend. In the frontend only the logic is tested; the screens have no tests yet.
 
 # Functional test cases
 
@@ -198,14 +201,17 @@ For the 20 new words, the public LSC-54 set is used (Mora-Zarate et al., 2025), 
 | DEF-01 | The LSC-54 set downloader could skip entire videos without warning | High | Fixed |
 | DEF-02 | Achievement counter not atomic: increments were lost with simultaneous translations | Medium | Fixed: atomic update with ON CONFLICT DO UPDATE |
 | DEF-03 | Unescaped username in the HTML of the recovery email | High (security) | Fixed: escapeHtml function |
-| DEF-04 | GET /api/profile/me failed if the profile did not yet exist | Medium | In verification |
-| DEF-05 | lexicon event contract test failed (305 of 306) | Low | Fixed: the current suite has 494 of 494 passing |
+| DEF-04 | GET /api/profile/me failed if the profile did not yet exist | Medium | Mitigated: a missing profile is created when preferences are saved and there is a recovery procedure; the query still returns 404 while it is missing |
+| DEF-05 | lexicon event contract test failed (305 of 306) | Low | Fixed: the test passes in the current suite |
+| DEF-06 | The letter L is never recognized: its hand shape matches the D or G rule first | Medium | Open (found by the frontend unit tests) |
+| DEF-07 | Two iam-service migrations with the same number (010) when integrating account deletion | Medium | Fixed: renumbered to 012 before deployment |
+| DEF-08 | A recognition-service test returned 500 because of the new deleted-account guard | Low | Fixed: the test uses a simulated connection |
 
-*Note.* The defects come from the code and security audit of phase 4 of the microservices migration.
+*Note.* DEF-01 to DEF-05 come from the code and security audit of phase 4 of the microservices migration; DEF-06 to DEF-08 come from the frontend unit tests and the code review of October 16, 2026.
 
 # Conclusions
 
-The backend passes its entire automated suite (494 tests, 0 failures), and the critical end-to-end flows work with all services deployed in Docker. Pending items are the k6 performance tests, the screen reader tests, the measurement of recognition accuracy for the new words, and the pilot test with real users, which are scheduled for the next iteration.
+The backend passes its entire automated suite (683 tests: 681 passed, 0 failures, and 2 skipped because they need a test database) with 88.5% line coverage, above the 80% target. The frontend has its first 79 unit tests, all passing, although its coverage is still low (4.5%). The critical end-to-end flows work with all services deployed in Docker. Pending items are continuous integration to run the tests on every change, extending the frontend tests to the screens, the k6 performance tests, the screen reader tests, the measurement of recognition accuracy for the new words, and the pilot test with real users, which are scheduled for the next iteration.
 
 # References
 

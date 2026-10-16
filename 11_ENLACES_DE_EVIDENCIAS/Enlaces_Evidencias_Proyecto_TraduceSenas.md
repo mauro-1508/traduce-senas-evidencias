@@ -6,7 +6,7 @@
 - **Proyecto formativo:** Traduce Señas: traductor de Lengua de Señas Colombiana (LSC) a texto
 - **Equipo de trabajo:** Traduce Señas
 - **Integrantes:** Luis Alejandro Duarte Aldana, Juan Mauricio Suaza Solorzano, Juan Camilo Fierro Esquivel
-- **Fecha de entrega:** 15 de octubre de 2026 (última verificación de enlaces: 15/10/2026)
+- **Fecha de entrega:** 15 de octubre de 2026 (última verificación de enlaces: 16/10/2026)
 
 ## 2. Propósito
 
@@ -34,20 +34,20 @@ Reunir en un solo documento los enlaces a las evidencias del proyecto formativo 
 | 8 | Acciones correctivas, preventivas y de mejora | Hallazgos, prioridad, responsable, acción aplicada y evidencia de cierre. | [Acciones (PDF)](https://github.com/mauro-1508/traduce-senas-evidencias/blob/main/08_ACCIONES_CORRECTIVAS_PREVENTIVAS_Y_DE_MEJORAMIENTO/ES/PDF/08_Acciones_Correctivas_Preventivas_y_de_Mejoramiento.pdf) · [docs/15-project-control](https://github.com/mauro-1508/traduce-senas-evidencias/tree/main/docs/15-project-control) | Público | Riesgos y backlog técnico en docs; la evidencia de cierre son los PR del backend (por ejemplo [#24](https://github.com/mauro-1508/backendTS/pull/24)). |
 | 9 | Manual técnico, de instalación y de usuario | Requisitos previos, configuración, uso de funcionalidades y solución de problemas frecuentes. | [Manual técnico](https://github.com/mauro-1508/traduce-senas-evidencias/blob/main/MANUALES/ES/PDF/Manual_tecnico_APA.pdf) · [Manual de instalación](https://github.com/mauro-1508/traduce-senas-evidencias/blob/main/MANUALES/ES/PDF/Manual_instalacion_APA.pdf) · [Manual de usuario](https://github.com/mauro-1508/traduce-senas-evidencias/blob/main/MANUALES/ES/PDF/Manual_usuario_APA.pdf) · [docs/14-training](https://github.com/mauro-1508/traduce-senas-evidencias/tree/main/docs/14-training) | Público | Manuales en APA, en español e inglés. En docs están además el manual de administrador y la guía técnica de entrada. |
 | 10 | Artículo del proyecto | Problema, objetivos, solución, metodología, resultados y conclusiones. | [Artículo IEEE (PDF)](https://github.com/mauro-1508/traduce-senas-evidencias/blob/main/10_ARTICULO_DEL_PROYECTO/ES/PDF/10_Articulo_del_Proyecto_IEEE.pdf) | Público | Versión en inglés en la carpeta `EN` del mismo entregable. |
-| 11 | Aplicación desplegada o demostración | URL de acceso a la aplicación o entorno de demostración e instrucciones para verificar funcionalidades. | [Health check del gateway](http://179.236.77.215:8080/health) · [Alfabeto LSC (API)](http://179.236.77.215:8080/api/lexicon/alphabet) | Público | El backend está publicado en un VPS de Hostinger y responde 200. El 15/10/2026 el health check mostró profile-service caído (estado «degraded»). La interfaz se prueba con el APK o con `npx expo start` del repositorio frontend; la versión web pública queda pendiente del dominio con HTTPS. |
+| 11 | Aplicación desplegada o demostración | URL de acceso a la aplicación o entorno de demostración e instrucciones para verificar funcionalidades. | [Health check del gateway](http://179.236.77.215:8080/health) · [Alfabeto LSC (API)](http://179.236.77.215:8080/api/lexicon/alphabet) | Público | El backend está publicado en un VPS de Hostinger y responde 200. El 16/10/2026 el health check respondió «ok» con los cinco servicios arriba. La interfaz se prueba con el APK o con `npx expo start` del repositorio frontend; la versión web pública queda pendiente del dominio con HTTPS. |
 | 12 | Trazabilidad e integración de evidencias | Relación entre requisitos, historias de usuario, módulos implementados, pruebas y cambios o versiones. | [docs/04-requirements/traceability-matrix.md](https://github.com/mauro-1508/traduce-senas-evidencias/blob/main/docs/04-requirements/traceability-matrix.md) | Público | Cobertura declarada: 15/15 requisitos del SRS, 74/79 RF persistidos y 25/29 tablas. Los cambios por versión se siguen en el historial de PR de cada repositorio. |
 
 > **Credenciales de prueba:** este documento no incluye contraseñas. El evaluador puede crear una cuenta desde la aplicación (registro con verificación por correo). Si necesita una cuenta con rol ADMIN, la solicita a Juan Mauricio Suaza Solorzano, quien le asigna el rol por la API de administración y le comparte la clave por un canal privado.
 
 ## 5. Lista de verificación de accesibilidad y calidad
 
-- [x] Todos los enlaces abren el recurso correcto (verificado el 15/10/2026 sin iniciar sesión).
+- [x] Todos los enlaces abren el recurso correcto (verificado el 16/10/2026 sin iniciar sesión).
 - [x] No hay errores 404, accesos denegados ni solicitudes de permiso sin resolver.
 - [x] Los documentos se pueden leer y sus imágenes, diagramas y tablas son legibles.
 - [x] El repositorio permite identificar el proyecto, sus ramas y la versión entregada.
 - [x] La evidencia corresponde con el estado real del software.
 - [x] No se presentan pantallas o resultados simulados como si fueran funcionalidades implementadas.
-- [ ] La aplicación desplegada inicia y permite verificar las funcionalidades principales. *Parcial: el gateway responde, pero profile-service aparece caído y la web pública aún no está publicada.*
+- [x] La aplicación desplegada inicia y permite verificar las funcionalidades principales. *El backend responde con los cinco servicios arriba; la interfaz se prueba con el APK, y la web pública queda para cuando haya dominio con HTTPS.*
 - [x] La documentación, el repositorio y la aplicación coinciden en nombres, funcionalidades y versión.
 - [x] No se exponen credenciales, datos sensibles ni información privada.
 - [x] El documento incluye el nombre del proyecto, equipo, fecha de actualización y enlaces directos.
@@ -67,7 +67,7 @@ Reunir en un solo documento los enlaces a las evidencias del proyecto formativo 
 
 ## 7. Pendientes antes de la evaluación
 
-1. Recuperar profile-service en el VPS y repetir el health check hasta obtener «ok».
+1. Publicar la versión web con dominio propio y HTTPS (hoy la interfaz se prueba con el APK).
 
 ## 8. Recursos de consulta
 

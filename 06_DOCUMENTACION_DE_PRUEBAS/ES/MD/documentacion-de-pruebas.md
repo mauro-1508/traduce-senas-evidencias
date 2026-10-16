@@ -44,7 +44,7 @@ Se aplica la pirámide de pruebas: muchas pruebas unitarias rápidas en la base,
 
 | **Nivel** | **Objetivo** | **Herramienta** | **Meta** |
 |---|---|---|---|
-| Unitarias | Lógica de dominio y casos de uso en aislamiento, con repositorios falsos | node:test (Node.js 20) | ≥ 80 % de líneas; ≥ 90 % en domain/ |
+| Unitarias | Lógica de dominio y casos de uso en aislamiento, con repositorios falsos | node:test (backend); Jest + jest-expo (frontend) | ≥ 80 % de líneas; ≥ 90 % en domain/ |
 | Integración | Adaptadores con PostgreSQL, MongoDB y RabbitMQ reales | node:test + Docker Compose | Camino feliz y 2–3 errores por adaptador |
 | Contrato | Las respuestas HTTP cumplen el contrato OpenAPI | Contratos YAML de 07-api | 100 % de rutas públicas |
 | Extremo a extremo | Flujos completos del usuario a través del gateway | Docker Compose + cliente HTTP / prueba manual | Flujos críticos |
@@ -56,15 +56,15 @@ Se aplica la pirámide de pruebas: muchas pruebas unitarias rápidas en la base,
 
 ## Elementos a probar
 
-- api-gateway y los cinco microservicios (rama feat/microservices-split, commit 5a91e66).
+- api-gateway y los cinco microservicios (rama develop, commit 2993301).
 
 - Paquete compartido @traduce/shared.
 
-- Aplicación cliente en Android y en navegador de escritorio.
+- Aplicación cliente en Android y en navegador de escritorio, con pruebas unitarias de su lógica: validaciones, cliente de la API, flujos de autenticación y reconocimiento (rama chore/frontend-unit-tests).
 
 ## Elementos fuera de alcance de esta iteración
 
-- Pruebas de carga sobre un servidor de producción (no existe aún).
+- Pruebas de carga sobre el servidor de producción (traducesenas.tech), para no afectar a los usuarios.
 
 - Publicación en tiendas de aplicaciones.
 
@@ -105,36 +105,39 @@ Se aplica la pirámide de pruebas: muchas pruebas unitarias rápidas en la base,
 
 # Resultados de las pruebas automatizadas
 
-La suite automatizada del backend se ejecutó con «npm test», que compila el paquete compartido y corre las pruebas de todos los servicios con el ejecutor nativo de Node.js. El resultado fue el siguiente:
+Las suites automatizadas se ejecutaron con «npm test» en cada repositorio. En el backend, el comando compila el paquete compartido y corre las pruebas de todos los servicios con el ejecutor nativo de Node.js; en el frontend, corre Jest con el preset de Expo (jest-expo). El resultado fue el siguiente:
 
 **Tabla 4**
 
-*Resumen de la ejecución automatizada del 7 de octubre de 2026*
+*Resumen de la ejecución automatizada del 16 de octubre de 2026*
 
-| **Indicador** | **Valor** |
-|---|---|
-| Pruebas ejecutadas | 494 |
-| Suites (grupos) | 115 |
-| Aprobadas | 494 |
-| Fallidas | 0 |
-| Omitidas / canceladas | 0 / 0 |
-| Duración total | 87 segundos |
+| **Indicador** | **Backend** | **Frontend** |
+|---|---|---|
+| Pruebas ejecutadas | 683 | 79 |
+| Suites (grupos) | 141 | 8 |
+| Aprobadas | 681 | 79 |
+| Fallidas | 0 | 0 |
+| Omitidas / canceladas | 2 / 0 | 0 / 0 |
+| Duración total | 22 segundos | 3 segundos |
 
-*Nota.* Salida de «npm test» en la rama feat/microservices-split, commit 5a91e66.
+*Nota.* Backend: rama develop, commit 2993301; las 2 pruebas omitidas necesitan una base PostgreSQL de prueba (variable PROFILE_TEST_DATABASE_URL). Frontend: rama chore/frontend-unit-tests, commit 6219c0d.
 
 **Tabla 5**
 
 *Cobertura de las pruebas por componente*
 
-| **Componente** | **Archivos de prueba** | **Aspectos verificados** |
-|---|---|---|
-| @traduce/shared | 5 | Proveedor JWT, authMiddleware, requireRole, requirePermission, manejador de errores, configuración, validadores de eventos, reintento exponencial, bus en memoria y RabbitMQ |
-| api-gateway | 1 | Enrutamiento por prefijo, CORS con lista blanca, configuración, rutas públicas |
-| iam-service | 22 | Registro con verificación de correo, inicio de sesión según estado, recuperación de contraseña, JWT con roles y permisos, cambio y borrado de cuenta, plantillas de correo |
-| recognition-service | 11 | Traducciones, historial, plantillas de señas (solo ADMIN), muestras y consumo de eventos de lexicon con contrato |
-| lexicon-service | 6 | Catálogo, alfabeto, búsqueda, categorías, publicación y retiro de señas |
-| analytics-service | 4 | Registro de eventos, reportes y manejadores de eventos |
-| profile-service | 4 | Perfil, preferencias, notificaciones y logros |
+| **Componente** | **Archivos de prueba** | **Aspectos verificados** | **Cobertura de líneas** |
+|---|---|---|---|
+| @traduce/shared | 5 | Proveedor JWT, authMiddleware, requireRole, requirePermission, manejador de errores, configuración, validadores de eventos, reintento exponencial, bus en memoria y RabbitMQ | 99,5 % |
+| api-gateway | 1 | Enrutamiento por prefijo, CORS con lista blanca, configuración, rutas públicas, límite de peticiones | 100 % |
+| iam-service | 30 | Registro con verificación de correo, inicio de sesión según estado y con Google o Facebook, recuperación de contraseña, JWT con roles y permisos, cambio y borrado de cuenta (también con código por correo), envío de eventos con outbox, plantillas de correo | 89,3 % |
+| recognition-service | 13 | Traducciones, historial, plantillas de señas (solo ADMIN), muestras, consumo de eventos de lexicon con contrato y rechazo de escrituras de cuentas eliminadas | 86,0 % |
+| lexicon-service | 5 | Catálogo, alfabeto, búsqueda, categorías, publicación y retiro de señas | 83,5 % |
+| analytics-service | 6 | Registro de eventos, reportes, manejadores de eventos y borrado atómico de los datos de una cuenta | 95,1 % |
+| profile-service | 11 | Perfil, preferencias con permisos y creación del perfil faltante, notificaciones, logros con actualizaciones simultáneas, borrado de cuenta y recuperación de perfiles | 83,5 % |
+| Frontend (aplicación cliente) | 8 | Validación de correo y contraseña, cliente de la API (errores, token enviado solo a la API, aviso único de sesión caducada), flujos de confirmar correo y recuperar contraseña, contador de reenvío, normalización de la mano y clasificador KNN | 4,5 % |
+
+*Nota.* Cobertura de líneas medida el 16 de octubre de 2026 con la cobertura integrada de node:test en el backend (total 88,5 %) y con «jest --coverage» en el frontend. En el frontend solo se prueba la lógica; las pantallas aún no tienen pruebas.
 
 # Casos de prueba funcionales
 
@@ -198,14 +201,17 @@ Para las 20 palabras nuevas se usa el conjunto público LSC-54 (Mora-Zarate et a
 | DEF-01 | El descargador del conjunto LSC-54 podía omitir videos completos sin avisar | Alta | Corregido |
 | DEF-02 | Contador de logros no atómico: se perdían incrementos con traducciones simultáneas | Media | Corregido: actualización atómica con ON CONFLICT DO UPDATE |
 | DEF-03 | Nombre de usuario sin escapar en el HTML del correo de recuperación | Alta (seguridad) | Corregido: función escapeHtml |
-| DEF-04 | GET /api/profile/me fallaba si el perfil aún no existía | Media | En verificación |
-| DEF-05 | Prueba de contrato de eventos de lexicon fallaba (305 de 306) | Baja | Corregido: la suite actual tiene 494 de 494 en verde |
+| DEF-04 | GET /api/profile/me fallaba si el perfil aún no existía | Media | Mitigado: el perfil faltante se crea al guardar las preferencias y hay un procedimiento de recuperación; la consulta sigue respondiendo 404 mientras falte |
+| DEF-05 | Prueba de contrato de eventos de lexicon fallaba (305 de 306) | Baja | Corregido: la prueba pasa en la suite actual |
+| DEF-06 | La letra L nunca se reconoce: su forma de mano coincide antes con la regla de la D o la G | Media | Abierto (encontrado con las pruebas unitarias del frontend) |
+| DEF-07 | Dos migraciones de iam-service con el mismo número (010) al integrar el borrado de cuenta | Media | Corregido: renumerada a 012 antes del despliegue |
+| DEF-08 | Una prueba de recognition-service respondía 500 por la nueva protección de cuentas eliminadas | Baja | Corregido: la prueba usa una conexión simulada |
 
-*Nota.* Los defectos provienen de la auditoría de código y seguridad de la fase 4 de la migración a microservicios.
+*Nota.* DEF-01 a DEF-05 provienen de la auditoría de código y seguridad de la fase 4 de la migración a microservicios; DEF-06 a DEF-08, de las pruebas unitarias del frontend y de la revisión de código del 16 de octubre de 2026.
 
 # Conclusiones
 
-El backend supera la totalidad de su suite automatizada (494 pruebas, 0 fallas) y los flujos críticos de extremo a extremo funcionan con todos los servicios desplegados en Docker. Quedan pendientes las pruebas de rendimiento con k6, las pruebas con lector de pantalla, la medición de precisión del reconocimiento de las nuevas palabras y la prueba piloto con usuarios reales, que se programan para la siguiente iteración.
+El backend supera la totalidad de su suite automatizada (683 pruebas: 681 aprobadas, 0 fallas y 2 omitidas por necesitar una base de datos de prueba) con 88,5 % de cobertura de líneas, por encima de la meta de 80 %. El frontend cuenta con sus primeras 79 pruebas unitarias, todas aprobadas, aunque su cobertura todavía es baja (4,5 %). Los flujos críticos de extremo a extremo funcionan con todos los servicios desplegados en Docker. Quedan pendientes la integración continua que ejecute las pruebas en cada cambio, ampliar las pruebas del frontend a las pantallas, las pruebas de rendimiento con k6, las pruebas con lector de pantalla, la medición de precisión del reconocimiento de las nuevas palabras y la prueba piloto con usuarios reales, que se programan para la siguiente iteración.
 
 # Referencias
 

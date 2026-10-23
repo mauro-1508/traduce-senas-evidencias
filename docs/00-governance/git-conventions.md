@@ -6,7 +6,7 @@
 
 ```
 main        ← Production. Merge from release only. Always stable.
-  └── dev   ← Continuous integration. Merge from features.
+  └── develop ← Continuous integration. Merge from features (Backend, Frontend).
         └── feat/[description]    ← One branch per feature/user story
         └── fix/[description]     ← One branch per bugfix
         └── chore/[description]   ← Infrastructure, docs, dependency changes
@@ -14,7 +14,7 @@ main        ← Production. Merge from release only. Always stable.
 ```
 
 **Rules:**
-- Nobody commits directly to `main` or `dev`
+- Nobody commits directly to `main` or `develop`
 - Every task = one branch + one Pull Request
 - One branch = one task (do not mix different features)
 - Branches are deleted after merge
@@ -79,11 +79,13 @@ chore(deps): upgrade Spring Boot to 3.2.0
 - **Template:** use the template at `.github/pull_request_template.md`
 - **Green CI:** merge only proceeds if all pipeline checks pass
 
+**Integration branch:** `develop` (Backend, Frontend). Docs: PRs go straight to `main`; the remote `dev` branch is stale and not used.
+
 ---
 
 ## Merge policy
 
-- Use **Squash and Merge** for features (keeps `dev` history clean)
+- Use **Squash and Merge** for features (keeps `develop` history clean)
 - Use **Merge Commit** for releases to `main` (preserves full history)
 - **Do not** use Rebase & Merge (creates confusion in shared history)
 
@@ -98,3 +100,16 @@ Follow [SemVer](https://semver.org/): `MAJOR.MINOR.PATCH`
 git tag -a v1.2.0 -m "Release v1.2.0: add reports module"
 git push origin v1.2.0
 ```
+
+Backend and Frontend are versioned independently. The first release of both is `v1.0.0` (2026-10-19).
+
+| Repo | Source of the version | Notes |
+|------|-----------------------|-------|
+| Backend | root `package.json` (`version`) | One version for all services. `GET /health` of the api-gateway reports it |
+| Frontend | `app.json` (`expo.version`) | Shown in Profile and Admin. `expo.android.versionCode` goes up by 1 on every APK build |
+| traducesenas-download | GitHub Release `vX.Y.Z` with the asset `traducesenas.apk` | Same version as the Frontend `expo.version` of that APK |
+
+- `PATCH` for fixes, `MINOR` for new features, `MAJOR` for breaking API or app changes.
+- Bump the version in a PR to `develop` before releasing; tag the commit on `main` after the release merge.
+- Every tag gets a GitHub Release with generated notes: `gh release create v1.2.0 --generate-notes`.
+- Docs and Evidencias are not versioned.

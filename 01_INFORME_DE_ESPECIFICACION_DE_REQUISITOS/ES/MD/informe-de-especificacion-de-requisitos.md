@@ -138,7 +138,7 @@ Técnicamente, el sistema está formado por un cliente desarrollado con React Na
 
 - Los usuarios tienen acceso a un teléfono inteligente o a un computador con cámara.
 
-- El sistema depende de servicios externos: MediaPipe, servidor de correo SMTP y, a futuro, Firebase Cloud Messaging.
+- El sistema depende de MediaPipe Tasks Vision (detección de manos y pose), de un modelo propio en TensorFlow.js entrenado con 54 señas y de un servidor de correo SMTP. No usa Firebase: las notificaciones se entregan dentro de la aplicación y por correo (ADR-007).
 
 # Requisitos específicos
 
@@ -200,6 +200,8 @@ La Tabla 4 resume los once requisitos funcionales del sistema y sus especificaci
 | RF10 | Manejo de errores | ERF10.1 Clasificación y consulta de errores | Media |
 | RF11 | Política de contraseñas | ERF11.1 Configuración de la política | Media |
 
+*Nota.* El estado de RF8 a RF11 queda pendiente de decisión del equipo.
+
 ### Módulo de identidad (iam-service)
 
 **Tabla 5**
@@ -208,13 +210,12 @@ La Tabla 4 resume los once requisitos funcionales del sistema y sus especificaci
 
 | **ID** | **Descripción** | **Origen** | **Prioridad** |
 |---|---|---|---|
-| FR-001 | Registrar usuario con nombre, fecha de nacimiento, usuario, correo y contraseña válida; la cuenta nace INACTIVE hasta verificar el correo | RF1 | Debe |
+| FR-001 | Registrar usuario con nombre, correo, contraseña válida y aceptación de los términos con fecha y versión; la cuenta nace INACTIVE hasta verificar el correo | RF1 | Debe |
 | FR-002 | Rechazar el registro sin aceptar los términos y guardar fecha y versión aceptada | RF1 | Debe |
 | FR-003 | Verificar el correo con un código de 6 dígitos | RF1 | Debe |
 | FR-004 | Guardar los códigos solo como hash, con vencimiento, un solo uso y contador de intentos | RF1 | Debe |
 | FR-005 | Autenticar con correo y contraseña | RF1 | Debe |
 | FR-006 | Bloquear temporalmente tras intentos fallidos (1, 5 y 10 minutos) | RF1 | Debe |
-| FR-007 | Bloquear definitivamente al agotar la escala; solo el administrador restaura | RF1 | Debe |
 | FR-008 | Registro e inicio de sesión con Google y Facebook | RF1 | Debe |
 | FR-010 | Recuperar la contraseña con un código de un solo uso que vence | RF1 | Debe |
 | FR-012 | Rotar los tokens de refresco y detectar su reutilización | RF1 | Debe |
@@ -247,9 +248,9 @@ La Tabla 4 resume los once requisitos funcionales del sistema y sus especificaci
 | FR-201 | Ver y editar los datos del perfil | RF5 | Debe |
 | FR-202 | Cambiar la contraseña cumpliendo la política vigente | RF5 | Debe |
 | FR-203 | Elegir tema claro u oscuro | RF5 | Debería |
-| FR-204 | Elegir el idioma de la interfaz (español / inglés) | RF5 | Debería |
+| FR-204 | Elegir el idioma de la interfaz (español, inglés, francés y portugués) | RF5 | Debería |
 | FR-205 | Activar o desactivar todas las notificaciones con un interruptor | RF4, RF5 | Debe |
-| FR-502 | Entregar notificaciones solo por canales visuales (push, en la app, correo) | RF4 | Debe |
+| FR-502 | Entregar notificaciones solo por canales visuales: en la app y por correo (sin push, ADR-007) | RF4 | Debe |
 | FR-507 | Marcar una notificación como leída | RF4 | Debe |
 
 ### Módulo de léxico (lexicon-service)
@@ -278,7 +279,7 @@ La Tabla 4 resume los once requisitos funcionales del sistema y sus especificaci
 |---|---|---|---|
 | FR-401 | Capturar señas con la cámara y traducirlas a texto en tiempo real | RF3 | Debe |
 | FR-402 | Ofrecer salida en audio, siempre acompañada del texto visible | RF3 | Debería |
-| FR-403 | Registrar el modelo que produjo cada traducción y su confianza | RF3 | Debe |
+| FR-403 | Registrar la confianza y la fuente (motor) de cada traducción | RF3 | Debe |
 | FR-405 | Avisar visualmente cuando la seña no se reconoce, en vez de mostrar una traducción errónea | RF3 | Debe |
 | FR-406 | Ver el historial propio de traducciones, de la más reciente a la más antigua | RF3, RF5 | Debe |
 | FR-407 | Borrar entradas del historial (borrado lógico) | RF5 | Debería |
@@ -420,22 +421,23 @@ La Tabla 4 resume los once requisitos funcionales del sistema y sus especificaci
 
 # Trazabilidad
 
-Cada requisito funcional está ligado a la historia de usuario que lo planifica y a las tablas que lo persisten. La matriz de trazabilidad completa se mantiene en el repositorio de documentación (04-requirements/traceability-matrix.md). La Tabla 18 resume la cobertura actual.
+Cada requisito funcional está ligado a la historia de usuario que lo planifica y a las tablas que lo persisten. La matriz de trazabilidad completa se mantiene en el repositorio de documentación (04-requirements/traceability-matrix.md). La Tabla 18 resume el estado de implementación de los 79 requisitos detallados según esa matriz.
 
 **Tabla 18**
 
-*Resumen de cobertura de la trazabilidad*
+*Estado de implementación de los requisitos detallados*
 
-| **Relación** | **Cobertura** |
+| **Estado** | **Requisitos detallados** |
 |---|---|
-| Requisitos del SRS con al menos un requisito detallado | 15 de 15 |
-| Requisitos detallados con historia de usuario | 79 de 79 |
-| Requisitos detallados persistidos en el modelo de datos | 74 de 79 (los 5 restantes no persisten datos) |
-| Tablas del modelo de datos usadas por algún requisito | 25 de 29 |
+| Cubiertos | 47 |
+| Parciales | 10 |
+| Sin implementar | 20 |
+| Sin verificar | 2 |
+| **Total** | **79** |
 
 # Conclusiones
 
-La especificación deja definidos once requisitos funcionales, desglosados en 79 requisitos detallados, y doce requisitos no funcionales con métricas medibles. La accesibilidad y la protección de datos personales se establecen como restricciones principales por la naturaleza de los usuarios y de la información biométrica que maneja el sistema.
+La especificación deja definidos once requisitos funcionales, desglosados en 79 requisitos detallados, y doce requisitos no funcionales. De los 79 requisitos detallados, 47 están cubiertos, 10 de forma parcial, 20 sin implementar y 2 sin verificar. La accesibilidad y la protección de datos personales se establecen como restricciones principales por la naturaleza de los usuarios y de la información biométrica que maneja el sistema.
 
 Este documento es la línea base para el análisis, el diseño y las pruebas; cualquier cambio de alcance debe registrarse aquí y en la matriz de trazabilidad antes de implementarse.
 

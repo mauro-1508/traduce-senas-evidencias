@@ -138,7 +138,7 @@ Technically, the system consists of a client built with React Native and Expo (r
 
 - Users have access to a smartphone or a computer with a camera.
 
-- The system depends on external services: MediaPipe, an SMTP mail server, and, in the future, Firebase Cloud Messaging.
+- The system depends on MediaPipe Tasks Vision (hand and pose detection), a custom TensorFlow.js model trained on 54 signs, and an SMTP mail server. It does not use Firebase: notifications are delivered in the app and by email (ADR-007).
 
 # Specific requirements
 
@@ -200,6 +200,8 @@ Table 4 summarizes the eleven functional requirements of the system and their sp
 | RF10 | Error handling | ERF10.1 Error classification and query | Medium |
 | RF11 | Password policy | ERF11.1 Policy configuration | Medium |
 
+*Note.* The status of RF8 to RF11 is pending a team decision.
+
 ### Identity module (iam-service)
 
 **Table 5**
@@ -208,13 +210,12 @@ Table 4 summarizes the eleven functional requirements of the system and their sp
 
 | **ID** | **Description** | **Source** | **Priority** |
 |---|---|---|---|
-| FR-001 | Register a user with name, date of birth, username, email, and a valid password; the account is created as INACTIVE until the email is verified | RF1 | Must |
+| FR-001 | Register a user with name, email, a valid password, and acceptance of the terms with date and version; the account is created as INACTIVE until the email is verified | RF1 | Must |
 | FR-002 | Reject registration unless the terms are accepted, and store the accepted date and version | RF1 | Must |
 | FR-003 | Verify the email with a 6-digit code | RF1 | Must |
 | FR-004 | Store codes only as hashes, with expiration, single use, and an attempt counter | RF1 | Must |
 | FR-005 | Authenticate with email and password | RF1 | Must |
 | FR-006 | Temporarily lock the account after failed attempts (1, 5, and 10 minutes) | RF1 | Must |
-| FR-007 | Permanently lock the account when the escalation is exhausted; only the administrator can restore it | RF1 | Must |
 | FR-008 | Registration and sign-in with Google and Facebook | RF1 | Must |
 | FR-010 | Recover the password with a single-use code that expires | RF1 | Must |
 | FR-012 | Rotate refresh tokens and detect their reuse | RF1 | Must |
@@ -247,9 +248,9 @@ Table 4 summarizes the eleven functional requirements of the system and their sp
 | FR-201 | View and edit profile data | RF5 | Must |
 | FR-202 | Change the password in compliance with the current policy | RF5 | Must |
 | FR-203 | Choose a light or dark theme | RF5 | Should |
-| FR-204 | Choose the interface language (Spanish / English) | RF5 | Should |
+| FR-204 | Choose the interface language (Spanish, English, French, and Portuguese) | RF5 | Should |
 | FR-205 | Enable or disable all notifications with a single toggle | RF4, RF5 | Must |
-| FR-502 | Deliver notifications only through visual channels (push, in-app, email) | RF4 | Must |
+| FR-502 | Deliver notifications only through visual channels: in-app and email (no push, ADR-007) | RF4 | Must |
 | FR-507 | Mark a notification as read | RF4 | Must |
 
 ### Lexicon module (lexicon-service)
@@ -278,7 +279,7 @@ Table 4 summarizes the eleven functional requirements of the system and their sp
 |---|---|---|---|
 | FR-401 | Capture signs with the camera and translate them into text in real time | RF3 | Must |
 | FR-402 | Provide audio output, always accompanied by visible text | RF3 | Should |
-| FR-403 | Record the model that produced each translation and its confidence | RF3 | Must |
+| FR-403 | Record the confidence and the source (engine) of each translation | RF3 | Must |
 | FR-405 | Visually warn when a sign is not recognized, instead of showing an incorrect translation | RF3 | Must |
 | FR-406 | View one's own translation history, from most recent to oldest | RF3, RF5 | Must |
 | FR-407 | Delete history entries (logical deletion) | RF5 | Should |
@@ -420,22 +421,23 @@ Table 4 summarizes the eleven functional requirements of the system and their sp
 
 # Traceability
 
-Each functional requirement is linked to the user story that plans it and to the tables that persist it. The complete traceability matrix is maintained in the documentation repository (04-requirements/traceability-matrix.md). Table 18 summarizes the current coverage.
+Each functional requirement is linked to the user story that plans it and to the tables that persist it. The complete traceability matrix is maintained in the documentation repository (04-requirements/traceability-matrix.md). Table 18 summarizes the implementation status of the 79 detailed requirements according to that matrix.
 
 **Table 18**
 
-*Traceability coverage summary*
+*Implementation status of the detailed requirements*
 
-| **Relationship** | **Coverage** |
+| **Status** | **Detailed requirements** |
 |---|---|
-| SRS requirements with at least one detailed requirement | 15 of 15 |
-| Detailed requirements with user story | 79 of 79 |
-| Detailed requirements persisted in the data model | 74 of 79 (the remaining 5 do not persist data) |
-| Data model tables used by at least one requirement | 25 of 29 |
+| Covered | 47 |
+| Partial | 10 |
+| Not implemented | 20 |
+| Not verified | 2 |
+| **Total** | **79** |
 
 # Conclusions
 
-The specification defines eleven functional requirements, broken down into 79 detailed requirements, and twelve nonfunctional requirements with measurable metrics. Accessibility and personal data protection are established as primary constraints due to the nature of the users and of the biometric information the system handles.
+The specification defines eleven functional requirements, broken down into 79 detailed requirements, and twelve nonfunctional requirements. Of the 79 detailed requirements, 47 are covered, 10 are partial, 20 are not implemented, and 2 are not verified. Accessibility and personal data protection are established as primary constraints due to the nature of the users and of the biometric information the system handles.
 
 This document is the baseline for analysis, design, and testing; any change in scope must be recorded here and in the traceability matrix before it is implemented.
 

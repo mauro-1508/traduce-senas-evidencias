@@ -240,6 +240,8 @@ Al pulsar **Reusar** en un registro aparece "Reusar traducción": por ahora solo
 
 El borrado quita el registro de tu historial (la app lo marca como borrado).
 
+El historial se muestra agrupado por sesiones: cada tarjeta reúne las traducciones que hiciste en una misma sesión. Además, las traducciones se borran solas a los 30 días de guardadas, así que el historial solo conserva el último mes.
+
 ### 5.5 Perfil
 
 En **Perfil** puedes:
@@ -254,7 +256,7 @@ En **Perfil** puedes:
 | **Idioma de la app** | Español, inglés, francés o portugués. |
 | **Cambiar contraseña** | Abre el flujo de cambio de contraseña. **Aún no cambia tu contraseña real** (las pantallas existen, pero no están conectadas al servidor). |
 | **Términos y condiciones** / **Política de privacidad** | Los textos legales de la app. Ver el aviso de la sección 7. |
-| **Logros** | Medallas con tu progreso. |
+| **Logros** | Medallas con tu progreso, incluidas las que se ganan con puntos de reto (ver 5.6). |
 | **Cerrar sesión** | Sale de tu cuenta. |
 | **Eliminar cuenta** | Ver el aviso siguiente. |
 
@@ -265,6 +267,16 @@ En **Perfil** puedes:
 ![Pantalla Perfil](capturas/usuario-10-perfil.png)
 
 > **"Eliminar cuenta" todavía no borra nada.** Hoy solo muestra un mensaje de confirmación; tu cuenta y tus datos **siguen existiendo**. Si necesitas que borren tus datos, pídelo a la persona que administra la aplicación (ver sección 7).
+
+### 5.6 Retos diarios y medallas
+
+Cada día la app te propone un reto de traducción: guardar 1, 3, 5 u 8 traducciones. Todos los usuarios ven el mismo reto del día, y cambia a medianoche (hora de Colombia).
+
+- En el **Perfil** verás una tarjeta con tu progreso del día. Se actualiza cada vez que guardas una traducción; solo cuentan las traducciones guardadas.
+- Al completar el reto ganas puntos (5, 10, 15 o 25, según la meta) y aparece un aviso en pantalla. Los puntos se cuentan una sola vez.
+- El Perfil muestra cuatro indicadores, entre ellos el total de tus puntos de reto, y se adaptan al tamaño de la pantalla.
+- Con los puntos de reto acumulados desbloqueas **medallas** en **Logros**. También verás un aviso cuando se desbloquea un logro.
+- Si desactivas las notificaciones en el Perfil, no recibes los avisos, pero tus puntos y tu reto completado se conservan.
 
 ## 6. Limitaciones conocidas
 

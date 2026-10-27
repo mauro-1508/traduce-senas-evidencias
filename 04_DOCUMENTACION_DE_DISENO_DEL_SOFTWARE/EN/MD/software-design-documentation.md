@@ -384,10 +384,16 @@ The following table summarizes the patterns applied, where they are used, and wh
 | user_profiles | profile | logical PK user_id | User presentation data |
 | user_preferences | profile | ES/EN, LIGHT/DARK | Language, theme, and notifications |
 | notifications | profile | PUSH / EMAIL / IN_APP channel | Visual-only notifications |
-| achievements | profile | Meta > 0 | Achievement catalog and progress |
+| achievements | profile | Meta > 0 | Achievement catalog and progress; since migration 010 it includes challenge-point medals |
+| challenges | profile | Active definitions ordered by code | Daily challenge catalog (TRANSLATE_1, 3, 5 and 8, worth 5, 10, 15 and 25 points) and their texts in Spanish, English, French and Portuguese |
+| user_challenges | profile | Unique per user and day | Snapshot of the challenge assigned to each user: target, progress and completion date |
+| challenge_rewards | profile | One per assignment | Challenge points actually granted; their sum feeds the medals |
+| admin_recipients, admin_report_runs | profile | One run per period | Recipients and control of the weekly and monthly email reports for administrators |
 | gesture_samples | recognition (MongoDB) | Mandatory consent | Training samples |
 
-The complete target model has 29 tables grouped into ten domains (identity, authorization, profile, lexicon, translation, AI, notifications, usage, gamification, and auditing) and is maintained in DBML format in the documentation repository (06-data/traduce_senas.dbml). The tables shown here are those that already have a migration in the code.
+The complete target model has 29 tables grouped into ten domains (identity, authorization, profile, lexicon, translation, AI, notifications, usage, gamification, and auditing) and is maintained in DBML format in the documentation repository (06-data/traduce_senas.dbml). The tables shown here are those that already have a migration in the code. The current profile migrations run from 001 to 010 (the last three: 008 admin reports, 009 daily challenges and 010 challenge-point medals).
+
+Two recent design rules do not change tables. History translations are deleted after 30 days (recognition-service), and the app shows the history grouped by sessions, one card per session. Each web screen also has its own URL. Admin reports use the notification types ADMIN_WEEKLY_REPORT and ADMIN_MONTHLY_REPORT and are delivered by email (ADR-007). The daily challenge changes at midnight, Bogotá time, and only advances with saved translations.
 
 # Conclusions
 

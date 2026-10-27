@@ -195,7 +195,7 @@ Table 4 summarizes the eleven functional requirements of the system and their sp
 | RF5 | Profile management | ERF5.1 View profile · ERF5.2 Light/dark theme · ERF5.3 Change password · ERF5.4 Language · ERF5.5 Recent translations | High |
 | RF6 | Usage statistics (administrator only) | ERF6.1 Access to statistics | Medium |
 | RF7 | Sign language alphabet | ERF7.1 Alphabet display | High |
-| RF8 | Gamification | ERF8.1 Achievement catalog and progress · ERF8.2 Achievement unlock and notice | Low |
+| RF8 | Gamification | ERF8.1 Achievement catalog and progress · ERF8.2 Achievement unlock and notice · ERF8.3 Daily challenges and challenge-point medals | Low |
 | RF9 | Internal audit | ERF9.1 Audit trail query | Medium |
 | RF10 | Error handling | ERF10.1 Error classification and query | Medium |
 | RF11 | Password policy | ERF11.1 Policy configuration | Medium |
@@ -252,6 +252,7 @@ Table 4 summarizes the eleven functional requirements of the system and their sp
 | FR-205 | Enable or disable all notifications with a single toggle | RF4, RF5 | Must |
 | FR-502 | Deliver notifications only through visual channels: in-app and email (no push, ADR-007) | RF4 | Must |
 | FR-507 | Mark a notification as read | RF4 | Must |
+| FR-510 | Send administrators with notifications enabled a weekly and a monthly report by email, with a link to the admin panel | RF4, RF6 | Could |
 
 ### Lexicon module (lexicon-service)
 
@@ -283,6 +284,8 @@ Table 4 summarizes the eleven functional requirements of the system and their sp
 | FR-405 | Visually warn when a sign is not recognized, instead of showing an incorrect translation | RF3 | Must |
 | FR-406 | View one's own translation history, from most recent to oldest | RF3, RF5 | Must |
 | FR-407 | Delete history entries (logical deletion) | RF5 | Should |
+| FR-409 | Show the history grouped by sessions, with one card per session | RF3, RF5 | Should |
+| FR-410 | Delete history translations 30 days after they were created | RF5 | Should |
 | FR-601 | Capture gesture samples grouped by capture session | RF3 | Must |
 | FR-602 | Do not store any sample without verifiable consent | — | Must |
 | FR-605 | Maintain a registry of models with their training metrics | RF3 | Must |
@@ -298,8 +301,13 @@ Table 4 summarizes the eleven functional requirements of the system and their sp
 | FR-701 | Record an event each time the user enters a section | RF6 | Must |
 | FR-703 | Show the administrator the most visited sections | RF6 | Must |
 | FR-706 | Statistics are aggregated and require permission | RF6 | Must |
+| FR-707 | Each web screen has its own URL, so it can be opened, reloaded and shared directly | RF2 | Should |
 | FR-801 | Maintain an achievements catalog with a target greater than zero | RF8 | Could |
 | FR-803 | An achievement is unlocked only once per user | RF8 | Could |
+| FR-806 | Assign each user a daily translation challenge (1, 3, 5 or 8 translations) and show its progress, which updates when translations are saved | RF8 | Could |
+| FR-807 | When the challenge is completed, store the point reward (5, 10, 15 or 25) and notify the user | RF8, RF4 | Could |
+| FR-808 | Grant medals based on the total accumulated challenge points | RF8 | Could |
+| FR-809 | Show an on-screen notice when an achievement is unlocked or a challenge is completed, without repeating it | RF8, RF4 | Could |
 | FR-901 | Maintain an audit trail with values before and after each change | RF9 | Must |
 | FR-904 | Classify errors by type (validation, authentication, permission, database, etc.) | RF10 | Must |
 | FR-905 | Configure the password policy; only one policy may be active | RF11 | Should |

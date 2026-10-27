@@ -76,6 +76,7 @@ El compose monta `../repos/Backend/migrations` (relativo a `infra/`) en `/docker
 - En `origin/develop` hay siete migraciones: `000_users.sql`, `001_translations.sql`, `002_sign_templates.sql`, `003_iam_roles_permissions.sql`, `004_analytics_usage_events.sql`, `005_auth_email_normalization_user_tokens.sql` y `006_users_status_email_verification.sql`.
 - **El esquema depende de la rama que esté en disco** en `repos/Backend/` (que debe ser `develop` al día, `2c4e62d`): si no lo es, faltan las migraciones 003 a 006 y las funciones de roles, estadísticas y verificación de correo no funcionarán. La rama local `chore/docker-backend` (y la `develop` local atrasada, `ad9815d`) solo tienen las migraciones 000 a 002: con ellas el registro falla, `/api/iam/me/access` da 404 y los SQL del primer uso (`users.status`, `user_roles`) no funcionan.
 - Si cambias de rama o una migración falla, hay que **reiniciar el volumen**.
+- En la versión por microservicios, `profile-service` llega hasta la migración `010`. Si ya tienes un volumen de profile creado, **no lo recrees**: aplica a mano, en orden y después de un respaldo, las migraciones `008_admin_reports.sql`, `009_daily_challenges.sql` y `010_challenge_reward_achievements.sql` con `docker compose exec -T postgres-profile psql -X -v ON_ERROR_STOP=1 -U postgres -d profile < services/profile-service/db/<archivo>.sql`. El procedimiento de implementación explica el detalle.
 
 ### 1.3 Variables de configuración (solo nombres)
 
@@ -90,7 +91,8 @@ El backend lee estas variables (`Backend@develop:src/shared/config/config.ts`). 
 | `PORT` | Puerto del backend (si falta, 3000). |
 | `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | Conexión a PostgreSQL. **Con Docker Compose, el compose las fija por ti**; no hace falta ponerlas en `.env`. |
 | `JWT_SECRET` | Secreto para firmar las sesiones. **Obligatorio.** Elige un texto largo y aleatorio. |
-| `EMAIL_USER`, `EMAIL_PASS` | Cuenta de correo (servicio `gmail`) para enviar los códigos de verificación. |
+| `EMAIL_USER`, `EMAIL_PASS` | Cuenta de correo (servicio `gmail`) para enviar los códigos de verificación y, en la versión por microservicios, los reportes semanales y mensuales a los administradores. |
+| `APP_URL` | Dirección pública de la web (por defecto `https://traducesenas.tech`). Es el destino del botón de los correos a los administradores. Solo la usa `profile-service`. |
 
 Pasos:
 

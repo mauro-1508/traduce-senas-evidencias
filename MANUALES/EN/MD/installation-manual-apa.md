@@ -76,6 +76,7 @@ The compose file mounts `../repos/Backend/migrations` (relative to `infra/`) at 
 - In `origin/develop` there are seven migrations: `000_users.sql`, `001_translations.sql`, `002_sign_templates.sql`, `003_iam_roles_permissions.sql`, `004_analytics_usage_events.sql`, `005_auth_email_normalization_user_tokens.sql` and `006_users_status_email_verification.sql`.
 - **The schema depends on the branch that is on disk** in `repos/Backend/` (which must be an up-to-date `develop`, `2c4e62d`): otherwise migrations 003 to 006 are missing and the roles, statistics and email verification features will not work. The local `chore/docker-backend` branch (and the outdated local `develop`, `ad9815d`) only have migrations 000 to 002: with them sign-up fails, `/api/iam/me/access` returns 404 and the first-use SQL statements (`users.status`, `user_roles`) do not work.
 - If you change branches or a migration fails, you must **reset the volume**.
+- In the microservice version, `profile-service` goes up to migration `010`. If you already have a profile volume, **do not recreate it**: apply by hand, in order and after a backup, migrations `008_admin_reports.sql`, `009_daily_challenges.sql` and `010_challenge_reward_achievements.sql` with `docker compose exec -T postgres-profile psql -X -v ON_ERROR_STOP=1 -U postgres -d profile < services/profile-service/db/<file>.sql`. The implementation procedure explains the details.
 
 ### 1.3 Configuration Variables (Names Only)
 
@@ -90,7 +91,8 @@ The backend reads these variables (`Backend@develop:src/shared/config/config.ts`
 | `PORT` | Backend port (3000 if missing). |
 | `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | PostgreSQL connection. **With Docker Compose, the compose file sets them for you**; you do not need to put them in `.env`. |
 | `JWT_SECRET` | Secret used to sign sessions. **Required.** Choose a long, random text. |
-| `EMAIL_USER`, `EMAIL_PASS` | Email account (`gmail` service) used to send the verification codes. |
+| `EMAIL_USER`, `EMAIL_PASS` | Email account (`gmail` service) used to send the verification codes and, in the microservice version, the weekly and monthly reports to administrators. |
+| `APP_URL` | Public address of the web app (default `https://traducesenas.tech`). It is the target of the button in the emails to administrators. Only `profile-service` uses it. |
 
 Steps:
 

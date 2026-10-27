@@ -65,7 +65,8 @@ Solo el API Gateway (puerto 8080) y el servidor web quedan expuestos a la red. L
 | POSTGRES_PASSWORD | Contraseña de las cinco bases PostgreSQL |
 | MONGO_ROOT_PASSWORD | Contraseña de MongoDB |
 | RABBITMQ_PASSWORD | Contraseña de RabbitMQ |
-| EMAIL_USER / EMAIL_PASS | Cuenta SMTP para enviar códigos de verificación y recuperación |
+| EMAIL_USER / EMAIL_PASS | Cuenta SMTP para enviar códigos de verificación y recuperación, y los reportes semanales y mensuales a los administradores |
+| APP_URL | Dirección pública de la web (por defecto https://traducesenas.tech); es el destino del botón de los correos al administrador |
 | CORS_ORIGINS | Dominios web autorizados, separados por comas |
 | Certificado TLS | HTTPS obligatorio en producción |
 
@@ -107,7 +108,15 @@ docker compose up --build -d
 
 docker compose ps     # todos los contenedores deben quedar en estado running/healthy
 
-Al arrancar, cada servicio aplica sus migraciones SQL (carpeta db/ de cada servicio) sobre su propia base de datos.
+Los archivos SQL de la carpeta db/ de cada servicio se aplican solo cuando el volumen de la base se crea por primera vez. En un volumen que ya existe, las migraciones nuevas se aplican a mano, con la plataforma levantada, después de hacer un respaldo y sin recrear el volumen. Las de profile-service que hoy pueden faltar son la 008 (reportes al administrador), la 009 (retos diarios) y la 010 (medallas por puntos de reto):
+
+docker compose exec -T postgres-profile psql -X -v ON_ERROR_STOP=1 -U postgres -d profile < services/profile-service/db/008_admin_reports.sql
+
+docker compose exec -T postgres-profile psql -X -v ON_ERROR_STOP=1 -U postgres -d profile < services/profile-service/db/009_daily_challenges.sql
+
+docker compose exec -T postgres-profile psql -X -v ON_ERROR_STOP=1 -U postgres -d profile < services/profile-service/db/010_challenge_reward_achievements.sql
+
+Aplica siempre en orden (001 a 010) y despliega profile-service antes que el frontend. La lista completa de comandos manuales está al inicio de docker-compose.yml.
 
 ## Paso 5. Verificar el backend
 

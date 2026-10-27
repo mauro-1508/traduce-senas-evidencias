@@ -66,6 +66,8 @@ frontend/
 
 ├── Dockerfile, nginx.conf  build and server for the web version
 
+├── e2e/                    end-to-end tests with Playwright (playwright.config.ts)
+
 └── src/
 
 ├── app/                config (api.config.ts, i18n), providers, routes
@@ -80,9 +82,9 @@ frontend/
 
 │   ├── Alphabet/       alphabet with 3D models (.glb)
 
-│   ├── History/        translation history
+│   ├── History/        translation history, grouped by sessions
 
-│   ├── Profile/        profile, terms and privacy
+│   ├── Profile/        profile, terms, privacy, daily challenges and achievements
 
 │   ├── Stats/          statistics (administrator)
 
@@ -111,6 +113,8 @@ frontend/
 | services/vision/templateStore.ts, motionTemplateStore.ts | Loading and caching of sign templates |
 | services/translations.service.ts | Stores and queries the history in the backend |
 | feature/auth/services | Real login against the backend and token handling |
+
+*Note.* The current client version is 1.2.0. Each web screen has its own URL; the password routes were renamed. The profile shows the daily challenge progress, the total of challenge points and a queue of notices for completed challenges and unlocked achievements.
 
 ## Main dependencies
 
@@ -264,7 +268,7 @@ services/lexicon-service/
 | /api/sign-templates, /api/samples, /api/recognition | recognition-service | Sign templates and training samples |
 | /api/lexicon | lexicon-service | alphabet, search, categories, señas, publicar, localizaciones, recursos |
 | /api/analytics | analytics-service | events, summary, daily, top-signs, reports/sections |
-| /api/profile, /api/notifications, /api/achievements | profile-service | me, me/stats, notifications and achievements |
+| /api/profile, /api/notifications, /api/achievements | profile-service | me, me/stats, notifications, achievements, challenges/today and challenges/rewards/summary (daily challenges and challenge points) |
 
 *Note.* Complete OpenAPI contracts in 07-api/contracts/openapi of the documentation repository.
 

@@ -32,6 +32,8 @@ To describe the dynamic behavior of the system's critical processes so that the 
 
 The analysis covers the processes with the greatest value and risk: login, registration with email verification, password recovery, live sign translation, and capture of training samples. Simple query processes (view alphabet, view history, view statistics) follow the same request-response pattern and are summarized in tables.
 
+One process added after these diagrams is the daily challenge: when a translation is saved, profile-service receives the TranslationProduced event, adds one to the user's challenge of the day and, on reaching the target, stores the points and creates the challenge-completed notice. Accumulated points unlock medals. The history groups translations by session, and translations are deleted after 30 days.
+
 # Context of the analysis
 
 Technically, the system consists of a client built with React Native and Expo (running on Android, iOS, and the web browser) and a microservices backend built with Node.js, Express, and TypeScript: an API Gateway and five domain services (iam, recognition, lexicon, analytics, and profile), each with its own PostgreSQL database, MongoDB for training samples, and RabbitMQ for asynchronous event-based communication.

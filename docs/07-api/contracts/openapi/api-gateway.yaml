@@ -3,12 +3,13 @@ info:
   title: API Gateway
   version: 1.0.0
   description: |
-    Single entry point of Traduce Señas (`01-api-gateway`, port 8080, the only port Docker Compose publishes to the host).
+    Single entry point of Traduce Señas (`01-api-gateway`, port 8080). In development (`docker-compose.yml`) it is the only service port
+    published to the host; in production (`docker-compose.prod.yml`) it is not published and Caddy serves 80/443 in front of it.
     The gateway owns no data and no business logic: it applies CORS and rate limits, checks the JWT when one is sent, and forwards
     each request to the service that owns the path prefix. Clients only talk to the gateway; the paths below `/api` are the ones
     documented in each service contract.
 
-    **Based on:** Backend `2993301` (`origin/develop`, 2026-10-16), `services/api-gateway` (`src/route_table.ts`, `src/app.ts`, `src/health.ts`,
+    **Based on:** Backend `a962982` (`main`), `services/api-gateway` (`src/route_table.ts`, `src/app.ts`, `src/health.ts`,
     `src/optional_auth.ts`, `src/cors_options.ts`, `src/proxies.ts`).
 
     ## Routing table
@@ -49,7 +50,7 @@ info:
     `401 UNAUTHORIZED` invalid token, `404 NOT_FOUND` unknown route, `429 RATE_LIMITED`, `502 BAD_GATEWAY` the upstream service does not answer.
 
     ## Pending (in progress by the backend team)
-    The backend team is adding a session version to the token (`401 SESSION_REVOKED`, `503 AUTH_UNAVAILABLE` at the gateway). It is not in Backend `2993301`, so it is not documented as behaviour.
+    The backend team is adding a session version to the token (`401 SESSION_REVOKED`, `503 AUTH_UNAVAILABLE` at the gateway). It is not in Backend `a962982`, so it is not documented as behaviour.
 
 servers:
   - url: https://traducesenas.tech
@@ -90,10 +91,9 @@ paths:
       description: |
         Calls `GET /health` of each service with a 2 second timeout (`HEALTH_TIMEOUT_MS`) and reports the result,
         together with the deployed backend version.
-        It always answers 200 while the gateway is alive; read the body to know if a service is down or degraded.
-        `degraded` at the top level means at least one service is not `up`. An external monitor should alert when the
-        top-level `status` changes, not on every poll.
-        No authentication required.
+        It always answers 200 while the gateway is alive; read the body to know if a service is down.
+        No authentication and no rate limit (it is mounted before the limiter).
+        Internal path, used by Docker `HEALTHCHECK`; from outside use `/api/health`.
       operationId: health
       tags: [Health]
       security: []
@@ -127,23 +127,32 @@ paths:
                       lexicon: { status: down }
                       analytics: { status: up }
                       profile: { status: up }
-                stuckErasure:
-                  summary: An account erasure is stuck (event waiting in the outbox)
-                  value:
-                    status: degraded
-                    version: 1.0.0
-                    services:
-                      iam: { status: degraded, issues: [outbox_backlog] }
-                      recognition: { status: up }
-                      lexicon: { status: up }
-                      analytics: { status: up }
-                      profile: { status: up }
-        '429':
-          description: Rate limit exceeded (`RATE_LIMITED`)
+
+  /api/health:
+    get:
+      summary: Public gateway health check
+      description: |
+        Same report as `GET /health`. Caddy only forwards `/api/*` to the gateway and keeps the path,
+        so this is the health check reachable from the internet: `https://traducesenas.tech/api/health`.
+      operationId: publicHealth
+      tags: [Health]
+      security: []
+      responses:
+        '200':
+          description: Gateway running (services may be down)
           content:
             application/json:
               schema:
-                $ref: './_shared.yaml#/components/schemas/ApiError'
+                $ref: '#/components/schemas/HealthReport'
+              example:
+                status: ok
+                version: 1.2.0
+                services:
+                  iam: { status: up }
+                  recognition: { status: up }
+                  lexicon: { status: up }
+                  analytics: { status: up }
+                  profile: { status: up }
 
 components:
   schemas:

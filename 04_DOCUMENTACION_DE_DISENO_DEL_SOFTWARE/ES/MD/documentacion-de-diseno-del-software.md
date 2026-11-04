@@ -384,10 +384,16 @@ La tabla siguiente resume los patrones aplicados, dónde se usan y qué problema
 | user_profiles | profile | PK user_id lógico | Datos de presentación del usuario |
 | user_preferences | profile | ES/EN, LIGHT/DARK | Idioma, tema y notificaciones |
 | notifications | profile | Canal PUSH / EMAIL / IN_APP | Notificaciones solo visuales |
-| achievements | profile | Meta > 0 | Catálogo y progreso de logros |
+| achievements | profile | Meta > 0 | Catálogo y progreso de logros; desde la migración 010 incluye medallas por puntos de reto |
+| challenges | profile | Definiciones activas ordenadas por código | Catálogo de retos diarios (TRANSLATE_1, 3, 5 y 8, con 5, 10, 15 y 25 puntos) y sus textos en español, inglés, francés y portugués |
+| user_challenges | profile | Único por usuario y día | Instantánea del reto asignado a cada usuario: meta, avance y fecha de finalización |
+| challenge_rewards | profile | Una por asignación | Puntos de reto realmente concedidos; la suma alimenta las medallas |
+| admin_recipients, admin_report_runs | profile | Un envío por periodo | Destinatarios y control de los reportes semanales y mensuales por correo para administradores |
 | gesture_samples | recognition (MongoDB) | Consentimiento obligatorio | Muestras de entrenamiento |
 
-El modelo objetivo completo tiene 29 tablas agrupadas en diez dominios (identidad, autorización, perfil, léxico, traducción, IA, notificaciones, uso, gamificación y auditoría) y se mantiene en formato DBML en el repositorio de documentación (06-data/traduce_senas.dbml). Las tablas mostradas aquí son las que ya tienen migración en el código.
+El modelo objetivo completo tiene 29 tablas agrupadas en diez dominios (identidad, autorización, perfil, léxico, traducción, IA, notificaciones, uso, gamificación y auditoría) y se mantiene en formato DBML en el repositorio de documentación (06-data/traduce_senas.dbml). Las tablas mostradas aquí son las que ya tienen migración en el código. Las migraciones vigentes de profile van de la 001 a la 010 (las tres últimas: 008 reportes al administrador, 009 retos diarios y 010 medallas por puntos de reto).
+
+Dos reglas de diseño recientes no cambian tablas. Las traducciones del historial se borran a los 30 días (recognition-service), y la aplicación muestra el historial agrupado por sesiones, una tarjeta por sesión. Además, cada pantalla web tiene su propia URL. Los reportes al administrador usan los tipos de notificación ADMIN_WEEKLY_REPORT y ADMIN_MONTHLY_REPORT y se entregan por correo (ADR-007). El reto del día cambia a medianoche, hora de Bogotá, y solo avanza con traducciones guardadas.
 
 # Conclusiones
 

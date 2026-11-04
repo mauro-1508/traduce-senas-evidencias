@@ -240,6 +240,8 @@ Tapping **Reuse** on a record shows "Reuse translation": for now it only shows a
 
 Deleting removes the record from your history (the app marks it as deleted).
 
+The history is shown grouped by sessions: each card gathers the translations you made in one session. Also, translations are deleted automatically 30 days after they are saved, so the history only keeps the last month.
+
 ### 5.5 Profile
 
 In **Profile** you can:
@@ -254,7 +256,7 @@ In **Profile** you can:
 | **App language** | Spanish, English, French or Portuguese. |
 | **Change password** | Opens the password change flow. **It does not change your real password yet** (the screens exist but are not connected to the server). |
 | **Terms and conditions** / **Privacy policy** | The app's legal texts. See the notice in section 7. |
-| **Achievements** | Medals showing your progress. |
+| **Achievements** | Medals showing your progress, including those earned with challenge points (see 5.6). |
 | **Sign out** | Leaves your account. |
 | **Delete account** | See the following notice. |
 
@@ -265,6 +267,16 @@ In **Profile** you can:
 ![Profile screen](capturas/usuario-10-perfil.png)
 
 > **"Delete account" does not delete anything yet.** Today it only shows a confirmation message; your account and your data **still exist**. If you need your data deleted, ask the person who manages the application (see section 7).
+
+### 5.6 Daily challenges and medals
+
+Every day the app gives you a translation challenge: save 1, 3, 5 or 8 translations. All users see the same challenge of the day, and it changes at midnight (Colombian time).
+
+- In the **Profile** you will see a card with your progress for the day. It updates every time you save a translation; only saved translations count.
+- When you complete the challenge you earn points (5, 10, 15 or 25, depending on the target) and a notice appears on screen. Points are counted only once.
+- The Profile shows four indicators, including the total of your challenge points, and they adapt to the screen size.
+- With the accumulated challenge points you unlock **medals** in **Achievements**. You will also see a notice when an achievement is unlocked.
+- If you turn notifications off in the Profile, you do not receive the notices, but your points and completed challenge are kept.
 
 ## 6. Known Limitations
 

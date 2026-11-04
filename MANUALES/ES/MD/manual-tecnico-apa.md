@@ -184,6 +184,16 @@ La tabla describe `origin/develop`.
 - Los bloqueos ALIGN-01, ALIGN-02 y DATA-11 de `Docs/06-data/open-items.md` siguen abiertos.
 - La estrategia de migración documentada (`node-pg-migrate`) no coincide con lo real (SQL manual).
 
+### 4.5 Servicio profile: retos, reportes y migraciones 001 a 010
+
+Estas secciones 4.2 a 4.4 describen el backend monolítico anterior. En la versión por microservicios, `profile-service` tiene sus propias migraciones (`services/profile-service/db/`), de la `001` a la `010`. Las últimas tres:
+
+- `008_admin_reports.sql`: tipos de notificación de reportes y recordatorios para administradores, y las tablas `admin_recipients` y `admin_report_runs`. Los reportes semanales y mensuales llegan por correo (Nodemailer, con logo y botón al panel de administración) a los administradores con las notificaciones activas.
+- `009_daily_challenges.sql`: tablas `challenges`, `user_challenges` (único por usuario y día) y `challenge_rewards`, el tipo de aviso `CHALLENGE_COMPLETED` y los retos TRANSLATE_1, 3, 5 y 8 (5, 10, 15 y 25 puntos). El reto del día se elige por fecha de Bogotá y solo avanza con traducciones guardadas.
+- `010_challenge_reward_achievements.sql`: agrega la métrica `DAILY_CHALLENGE_POINTS` para las medallas por puntos de reto.
+
+Rutas nuevas (con token): `GET /api/profile/challenges/today`, `GET /api/profile/challenges/rewards/summary` y `POST /api/achievements/activity`. En `recognition-service` las traducciones se borran a los 30 días. En un volumen existente, las migraciones se aplican a mano (ver el procedimiento de implementación). Los correos usan las variables `EMAIL_USER`, `EMAIL_PASS` y `APP_URL`.
+
 ## 5. Seguridad
 
 ### 5.1 Autenticación
@@ -306,7 +316,7 @@ El diagrama UC-01 debe leerse junto con el alcance del MVP: solo de seña a text
 ## 9. Pruebas
 
 - **Backend** (en `origin/develop`): 17 archivos `*.test.ts` en `tests/` (dominio, aplicación y adaptadores de `auth`, `iam`, `analytics`, `ia`, `translations`, `users`) con **vitest 5**. Comando: `npm test` (`vitest run`).
-- **Frontend:** no hay script `test`. Solo `npm run typecheck` (`tsc --noEmit`).
+- **Frontend (versión 1.2.0):** `npm test` corre Jest (servicios, formularios de autenticación, clasificadores de visión y almacenes de plantillas) y `npm run e2e` corre las pruebas extremo a extremo con Playwright (carpeta `e2e/`: auth, alphabet, history) contra el backend en Docker Compose. También está `npm run typecheck`.
 - **CI:** ningún repositorio tiene workflows de GitHub Actions: `Backend@develop` no tiene `.github/`, `Frontend` solo tiene notas de Copilot en `.github/`, y `Docs` solo la plantilla de pull request.
 
 ## 10. Instalación

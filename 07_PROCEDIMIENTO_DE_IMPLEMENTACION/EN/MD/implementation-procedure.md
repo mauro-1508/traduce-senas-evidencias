@@ -65,7 +65,8 @@ Only the API Gateway (port 8080) and the web server are exposed to the network. 
 | POSTGRES_PASSWORD | Password for the five PostgreSQL databases |
 | MONGO_ROOT_PASSWORD | MongoDB password |
 | RABBITMQ_PASSWORD | RabbitMQ password |
-| EMAIL_USER / EMAIL_PASS | SMTP account for sending verification and recovery codes |
+| EMAIL_USER / EMAIL_PASS | SMTP account for sending verification and recovery codes, and the weekly and monthly reports to administrators |
+| APP_URL | Public address of the web app (default https://traducesenas.tech); it is the target of the button in the administrator emails |
 | CORS_ORIGINS | Authorized web domains, separated by commas |
 | TLS certificate | HTTPS required in production |
 
@@ -107,7 +108,15 @@ docker compose up --build -d
 
 docker compose ps     # all containers must be in running/healthy state
 
-On startup, each service applies its SQL migrations (db/ folder of each service) to its own database.
+The SQL files in each service's db/ folder are applied only when the database volume is created for the first time. On a volume that already exists, new migrations are applied by hand, with the platform running, after taking a backup and without recreating the volume. The profile-service ones that may be missing today are 008 (admin reports), 009 (daily challenges) and 010 (challenge-point medals):
+
+docker compose exec -T postgres-profile psql -X -v ON_ERROR_STOP=1 -U postgres -d profile < services/profile-service/db/008_admin_reports.sql
+
+docker compose exec -T postgres-profile psql -X -v ON_ERROR_STOP=1 -U postgres -d profile < services/profile-service/db/009_daily_challenges.sql
+
+docker compose exec -T postgres-profile psql -X -v ON_ERROR_STOP=1 -U postgres -d profile < services/profile-service/db/010_challenge_reward_achievements.sql
+
+Always apply them in order (001 to 010) and deploy profile-service before the frontend. The full list of manual commands is at the top of docker-compose.yml.
 
 ## Step 5. Verify the backend
 

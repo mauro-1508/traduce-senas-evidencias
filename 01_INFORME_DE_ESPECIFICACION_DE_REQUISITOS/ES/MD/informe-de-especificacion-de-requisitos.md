@@ -195,7 +195,7 @@ La Tabla 4 resume los once requisitos funcionales del sistema y sus especificaci
 | RF5 | Gestión del perfil | ERF5.1 Ver perfil · ERF5.2 Tema claro/oscuro · ERF5.3 Cambiar contraseña · ERF5.4 Idioma · ERF5.5 Traducciones recientes | Alta |
 | RF6 | Estadísticas de uso (solo administrador) | ERF6.1 Acceso a estadísticas | Media |
 | RF7 | Alfabeto en lengua de señas | ERF7.1 Visualización del alfabeto | Alta |
-| RF8 | Gamificación | ERF8.1 Catálogo de logros y progreso · ERF8.2 Desbloqueo y aviso de logro | Baja |
+| RF8 | Gamificación | ERF8.1 Catálogo de logros y progreso · ERF8.2 Desbloqueo y aviso de logro · ERF8.3 Retos diarios y medallas por puntos de reto | Baja |
 | RF9 | Auditoría interna | ERF9.1 Consulta de la traza de auditoría | Media |
 | RF10 | Manejo de errores | ERF10.1 Clasificación y consulta de errores | Media |
 | RF11 | Política de contraseñas | ERF11.1 Configuración de la política | Media |
@@ -252,6 +252,7 @@ La Tabla 4 resume los once requisitos funcionales del sistema y sus especificaci
 | FR-205 | Activar o desactivar todas las notificaciones con un interruptor | RF4, RF5 | Debe |
 | FR-502 | Entregar notificaciones solo por canales visuales: en la app y por correo (sin push, ADR-007) | RF4 | Debe |
 | FR-507 | Marcar una notificación como leída | RF4 | Debe |
+| FR-510 | Enviar a los administradores con notificaciones activas un reporte semanal y otro mensual por correo, con enlace al panel de administración | RF4, RF6 | Podría |
 
 ### Módulo de léxico (lexicon-service)
 
@@ -283,6 +284,8 @@ La Tabla 4 resume los once requisitos funcionales del sistema y sus especificaci
 | FR-405 | Avisar visualmente cuando la seña no se reconoce, en vez de mostrar una traducción errónea | RF3 | Debe |
 | FR-406 | Ver el historial propio de traducciones, de la más reciente a la más antigua | RF3, RF5 | Debe |
 | FR-407 | Borrar entradas del historial (borrado lógico) | RF5 | Debería |
+| FR-409 | Mostrar el historial agrupado por sesiones, con una tarjeta por sesión | RF3, RF5 | Debería |
+| FR-410 | Eliminar las traducciones del historial a los 30 días de creadas | RF5 | Debería |
 | FR-601 | Capturar muestras de gestos agrupadas por sesión de captura | RF3 | Debe |
 | FR-602 | No guardar ninguna muestra sin consentimiento demostrable | — | Debe |
 | FR-605 | Mantener un registro de modelos con sus métricas de entrenamiento | RF3 | Debe |
@@ -298,8 +301,13 @@ La Tabla 4 resume los once requisitos funcionales del sistema y sus especificaci
 | FR-701 | Registrar un evento cada vez que el usuario entra a una sección | RF6 | Debe |
 | FR-703 | Mostrar al administrador las secciones más visitadas | RF6 | Debe |
 | FR-706 | Las estadísticas son agregadas y requieren permiso | RF6 | Debe |
+| FR-707 | Cada pantalla web tiene su propia URL, para poder abrirla, recargarla y compartirla directamente | RF2 | Debería |
 | FR-801 | Mantener un catálogo de logros con meta mayor que cero | RF8 | Podría |
 | FR-803 | Un logro se desbloquea una sola vez por usuario | RF8 | Podría |
+| FR-806 | Asignar a cada usuario un reto diario de traducción (1, 3, 5 u 8 traducciones) y mostrar su progreso, que se actualiza al guardar traducciones | RF8 | Podría |
+| FR-807 | Al completar el reto, guardar la recompensa en puntos (5, 10, 15 o 25) y avisar al usuario | RF8, RF4 | Podría |
+| FR-808 | Otorgar medallas según el total de puntos de reto acumulados | RF8 | Podría |
+| FR-809 | Avisar en pantalla cuando se desbloquea un logro o se completa un reto, sin repetir el aviso | RF8, RF4 | Podría |
 | FR-901 | Mantener una traza de auditoría con valores antes y después | RF9 | Debe |
 | FR-904 | Clasificar los errores por tipo (validación, autenticación, permiso, base de datos, etc.) | RF10 | Debe |
 | FR-905 | Configurar la política de contraseñas; solo una política activa | RF11 | Debería |

@@ -184,6 +184,16 @@ The table describes `origin/develop`.
 - Blockers ALIGN-01, ALIGN-02 and DATA-11 in `Docs/06-data/open-items.md` are still open.
 - The documented migration strategy (`node-pg-migrate`) does not match reality (manual SQL).
 
+### 4.5 Profile service: challenges, reports and migrations 001 to 010
+
+Sections 4.2 to 4.4 describe the previous monolithic backend. In the microservice version, `profile-service` has its own migrations (`services/profile-service/db/`), from `001` to `010`. The last three:
+
+- `008_admin_reports.sql`: notification types for admin reports and reminders, and the `admin_recipients` and `admin_report_runs` tables. Weekly and monthly reports are sent by email (Nodemailer, with logo and a button to the admin panel) to administrators who have notifications enabled.
+- `009_daily_challenges.sql`: tables `challenges`, `user_challenges` (unique per user and day) and `challenge_rewards`, the `CHALLENGE_COMPLETED` notice type and the challenges TRANSLATE_1, 3, 5 and 8 (5, 10, 15 and 25 points). The challenge of the day is chosen by Bogotá date and only advances with saved translations.
+- `010_challenge_reward_achievements.sql`: adds the `DAILY_CHALLENGE_POINTS` metric for challenge-point medals.
+
+New routes (with token): `GET /api/profile/challenges/today`, `GET /api/profile/challenges/rewards/summary` and `POST /api/achievements/activity`. In `recognition-service`, translations are deleted after 30 days. On an existing volume, migrations are applied by hand (see the implementation procedure). Emails use the variables `EMAIL_USER`, `EMAIL_PASS` and `APP_URL`.
+
 ## 5. Security
 
 ### 5.1 Authentication
@@ -306,7 +316,7 @@ Diagram UC-01 should be read together with the MVP scope: sign to text or speech
 ## 9. Tests
 
 - **Backend** (in `origin/develop`): 17 `*.test.ts` files in `tests/` (domain, application and adapters of `auth`, `iam`, `analytics`, `ia`, `translations`, `users`) with **vitest 5**. Command: `npm test` (`vitest run`).
-- **Frontend:** there is no `test` script. Only `npm run typecheck` (`tsc --noEmit`).
+- **Frontend (version 1.2.0):** `npm test` runs Jest (services, authentication forms, vision classifiers and template stores) and `npm run e2e` runs the end-to-end tests with Playwright (`e2e/` folder: auth, alphabet, history) against the backend in Docker Compose. `npm run typecheck` is also available.
 - **CI:** no repository has GitHub Actions workflows: `Backend@develop` has no `.github/`, `Frontend` only has Copilot notes in `.github/`, and `Docs` only the pull request template.
 
 ## 10. Installation

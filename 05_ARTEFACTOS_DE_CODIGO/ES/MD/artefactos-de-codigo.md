@@ -66,6 +66,8 @@ frontend/
 
 ├── Dockerfile, nginx.conf  construcción y servidor de la versión web
 
+├── e2e/                    pruebas extremo a extremo con Playwright (playwright.config.ts)
+
 └── src/
 
 ├── app/                config (api.config.ts, i18n), providers, routes
@@ -80,9 +82,9 @@ frontend/
 
 │   ├── Alphabet/       alfabeto con modelos 3D (.glb)
 
-│   ├── History/        historial de traducciones
+│   ├── History/        historial de traducciones, agrupado por sesiones
 
-│   ├── Profile/        perfil, términos y privacidad
+│   ├── Profile/        perfil, términos, privacidad, retos diarios y logros
 
 │   ├── Stats/          estadísticas (administrador)
 
@@ -111,6 +113,8 @@ frontend/
 | services/vision/templateStore.ts, motionTemplateStore.ts | Carga y caché de las plantillas de señas |
 | services/translations.service.ts | Guarda y consulta el historial en el backend |
 | feature/auth/services | Inicio de sesión real contra el backend y manejo del token |
+
+*Nota.* La versión actual del cliente es la 1.2.0. Cada pantalla web tiene su propia URL; las rutas de contraseña se renombraron. El perfil muestra el progreso del reto diario, el total de puntos de reto y una cola de avisos de retos completados y logros desbloqueados.
 
 ## Dependencias principales
 
@@ -264,7 +268,7 @@ services/lexicon-service/
 | /api/sign-templates, /api/samples, /api/recognition | recognition-service | Plantillas de señas y muestras de entrenamiento |
 | /api/lexicon | lexicon-service | alphabet, search, categories, señas, publicar, localizaciones, recursos |
 | /api/analytics | analytics-service | events, summary, daily, top-signs, reports/sections |
-| /api/profile, /api/notifications, /api/achievements | profile-service | me, me/stats, notificaciones y logros |
+| /api/profile, /api/notifications, /api/achievements | profile-service | me, me/stats, notificaciones, logros, challenges/today y challenges/rewards/summary (retos diarios y puntos de reto) |
 
 *Nota.* Contratos OpenAPI completos en 07-api/contracts/openapi del repositorio de documentación.
 

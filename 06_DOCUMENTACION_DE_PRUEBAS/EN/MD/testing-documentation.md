@@ -47,7 +47,7 @@ The test pyramid is applied: many fast unit tests at the base, fewer integration
 | Unit | Domain logic and use cases in isolation, with fake repositories | node:test (backend); Jest + jest-expo (frontend) | ≥ 80% of lines; ≥ 90% in domain/ |
 | Integration | Adapters with real PostgreSQL, MongoDB, and RabbitMQ | node:test + Docker Compose | Happy path and 2–3 errors per adapter |
 | Contract | HTTP responses comply with the OpenAPI contract | YAML contracts from 07-api | 100% of public routes |
-| End-to-end | Complete user flows through the gateway | Docker Compose + HTTP client / manual test | Critical flows |
+| End-to-end | Complete user flows through the gateway | Playwright in CI against the backend in Docker Compose; HTTP client / manual test | Critical flows |
 | Acceptance | Validation with real users (deaf and hearing people) | Guided pilot test | Use cases CU-01 to CU-06 |
 | Accessibility | Contrast, target size, and screen readers | Accessibility Scanner, TalkBack, manual review | WCAG 2.1 AA |
 | Performance | Latency and performance of critical services | k6 | P95 < 300 ms with 50 requests/s |
@@ -137,7 +137,9 @@ The automated suites were run with “npm test” in each repository. In the bac
 | profile-service | 11 | Profile, preferences with permissions and creation of a missing profile, notifications, achievements under concurrent updates, account deletion, and profile recovery | 83.5% |
 | Frontend (client application) | 8 | Email and password validation, API client (errors, token sent only to the API, single expired-session notice), confirm-email and password-recovery flows, resend countdown, hand normalization, and KNN classifier | 4.5% |
 
-*Note.* Line coverage measured on October 16, 2026 with the built-in node:test coverage in the backend (88.5% in total) and with “jest --coverage” in the frontend. In the frontend only the logic is tested; the screens have no tests yet.
+*Note.* Line coverage measured on October 16, 2026 with the built-in node:test coverage in the backend (88.5% in total) and with “jest --coverage” in the frontend. That run predates the tests described below, so the figures in Tables 4 and 5 do not include them.
+
+**Tests added after that run.** In the frontend (version 1.2.0), Jest tests were added for the services, the authentication forms, the vision classifiers and the template stores, plus an end-to-end suite with Playwright (e2e/ folder: auth, alphabet and history). The suite runs with “npm run e2e” on the exported web app, against the backend started with Docker Compose, with a single worker (the gateway limits logins per minute), a phone-sized viewport and the browser's fake camera; in CI it runs against the backend in compose. In the backend (profile-service), tests were added for daily challenges (domain, use cases, API and real PostgreSQL), challenge-point medals and the emails sent to administrators.
 
 # Functional test cases
 
@@ -162,6 +164,10 @@ The following cases verify the critical requirements. The “Passed” status in
 | CP-11 | FR-405 | Sign not recognized | Gesture outside the vocabulary | Visual notice; no word is shown | Pending (manual test on device) |
 | CP-12 | FR-304, FR-310 | Alphabet query | GET /api/lexicon/alphabet | Only LSC letters in ACTIVE status | Passed (automated) |
 | CP-13 | FR-406 | Private history | User A queries the history of B | Sees only their own translations | Pending (manual test) |
+| CP-14 | FR-806, FR-807 | Daily challenge completed | User who saves as many translations as the day's target | Progress up to the target; reward stored only once; CHALLENGE_COMPLETED notice | Pending (automated tests exist in profile-service; no result in this report) |
+| CP-15 | FR-808 | Challenge-point medal | User who accumulates challenge points | GET /api/profile/challenges/rewards/summary returns the total; the medal is granted once | Pending (same) |
+| CP-16 | FR-409, FR-707 | History by sessions and own URL | Open the history by its URL with several saved translations | One card per session; the screen reloads without losing the route | Pending (the Playwright suite covers history; result not yet recorded) |
+| CP-17 | FR-410 | 30-day retention | Translation older than 30 days | The translation no longer appears in the history | Pending (manual test) |
 | CP-14 | FR-014 | Delete account | Authenticated user | Data deleted in one transaction and usage events anonymized | Passed (automated) |
 | CP-16 | FR-602 | Sample without consent | Sample without consent field | 400; the sample is not saved | Passed (automated) |
 | CP-15 | FR-706 | Statistics with USER role | Token without permission | 403 Forbidden | Passed (automated) |

@@ -47,7 +47,7 @@ Se aplica la pirámide de pruebas: muchas pruebas unitarias rápidas en la base,
 | Unitarias | Lógica de dominio y casos de uso en aislamiento, con repositorios falsos | node:test (backend); Jest + jest-expo (frontend) | ≥ 80 % de líneas; ≥ 90 % en domain/ |
 | Integración | Adaptadores con PostgreSQL, MongoDB y RabbitMQ reales | node:test + Docker Compose | Camino feliz y 2–3 errores por adaptador |
 | Contrato | Las respuestas HTTP cumplen el contrato OpenAPI | Contratos YAML de 07-api | 100 % de rutas públicas |
-| Extremo a extremo | Flujos completos del usuario a través del gateway | Docker Compose + cliente HTTP / prueba manual | Flujos críticos |
+| Extremo a extremo | Flujos completos del usuario a través del gateway | Playwright en CI contra el backend en Docker Compose; cliente HTTP / prueba manual | Flujos críticos |
 | Aceptación | Validación con usuarios reales (personas sordas y oyentes) | Prueba piloto guiada | Casos de uso CU-01 a CU-06 |
 | Accesibilidad | Contraste, tamaño de objetivos y lectores de pantalla | Accessibility Scanner, TalkBack, revisión manual | WCAG 2.1 AA |
 | Rendimiento | Latencia y rendimiento de los servicios críticos | k6 | P95 < 300 ms con 50 peticiones/s |
@@ -137,7 +137,9 @@ Las suites automatizadas se ejecutaron con «npm test» en cada repositorio. En 
 | profile-service | 11 | Perfil, preferencias con permisos y creación del perfil faltante, notificaciones, logros con actualizaciones simultáneas, borrado de cuenta y recuperación de perfiles | 83,5 % |
 | Frontend (aplicación cliente) | 8 | Validación de correo y contraseña, cliente de la API (errores, token enviado solo a la API, aviso único de sesión caducada), flujos de confirmar correo y recuperar contraseña, contador de reenvío, normalización de la mano y clasificador KNN | 4,5 % |
 
-*Nota.* Cobertura de líneas medida el 16 de octubre de 2026 con la cobertura integrada de node:test en el backend (total 88,5 %) y con «jest --coverage» en el frontend. En el frontend solo se prueba la lógica; las pantallas aún no tienen pruebas.
+*Nota.* Cobertura de líneas medida el 16 de octubre de 2026 con la cobertura integrada de node:test en el backend (total 88,5 %) y con «jest --coverage» en el frontend. Esa corrida es anterior a las pruebas descritas abajo, por lo que las cifras de las tablas 4 y 5 no las incluyen.
+
+**Pruebas añadidas después de esa corrida.** En el frontend (versión 1.2.0) se agregaron pruebas de Jest para los servicios, los formularios de autenticación, los clasificadores de visión y los almacenes de plantillas, y una suite extremo a extremo con Playwright (carpeta e2e/: auth, alphabet e history). Esa suite se ejecuta con «npm run e2e» sobre la web exportada, contra el backend levantado con Docker Compose, con un solo worker (el gateway limita los inicios de sesión por minuto), ancho de celular y cámara falsa del navegador; en CI corre contra el backend en compose. En el backend (profile-service) se agregaron pruebas de retos diarios (dominio, casos de uso, API y PostgreSQL real), de las medallas por puntos de reto y del envío de correos a los administradores.
 
 # Casos de prueba funcionales
 
@@ -162,6 +164,10 @@ Los casos siguientes verifican los requisitos críticos. El estado «Aprobado» 
 | CP-11 | FR-405 | Seña no reconocida | Gesto fuera del vocabulario | Aviso visual; no se muestra palabra | Pendiente (prueba manual en dispositivo) |
 | CP-12 | FR-304, FR-310 | Consulta del alfabeto | GET /api/lexicon/alphabet | Solo letras de la LSC en estado ACTIVE | Aprobado (automatizada) |
 | CP-13 | FR-406 | Historial privado | Usuario A consulta historial de B | Solo ve sus propias traducciones | Pendiente (prueba manual) |
+| CP-14 | FR-806, FR-807 | Reto diario completado | Usuario que guarda tantas traducciones como la meta del día | Progreso hasta la meta; recompensa guardada una sola vez; aviso CHALLENGE_COMPLETED | Pendiente (hay pruebas automatizadas en profile-service; sin resultado en este informe) |
+| CP-15 | FR-808 | Medalla por puntos de reto | Usuario que acumula puntos de reto | GET /api/profile/challenges/rewards/summary devuelve el total; la medalla se otorga una vez | Pendiente (ídem) |
+| CP-16 | FR-409, FR-707 | Historial por sesiones y URL propia | Abrir el historial por su URL con varias traducciones guardadas | Una tarjeta por sesión; la pantalla se recarga sin perder la ruta | Pendiente (la suite Playwright cubre el historial; falta registrar resultado) |
+| CP-17 | FR-410 | Retención de 30 días | Traducción con más de 30 días | La traducción deja de aparecer en el historial | Pendiente (prueba manual) |
 | CP-14 | FR-014 | Eliminar cuenta | Usuario autenticado | Datos borrados en una transacción y eventos de uso anonimizados | Aprobado (automatizada) |
 | CP-16 | FR-602 | Muestra sin consentimiento | Muestra sin campo de consentimiento | 400; la muestra no se guarda | Aprobado (automatizada) |
 | CP-15 | FR-706 | Estadísticas con rol USER | Token sin permiso | 403 Prohibido | Aprobado (automatizada) |

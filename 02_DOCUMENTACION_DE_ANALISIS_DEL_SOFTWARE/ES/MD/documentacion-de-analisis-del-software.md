@@ -32,6 +32,8 @@ Describir el comportamiento dinámico de los procesos críticos del sistema para
 
 El análisis cubre los procesos que más valor y riesgo tienen: inicio de sesión, registro con verificación de correo, recuperación de contraseña, traducción de señas en vivo y captura de muestras para entrenamiento. Los procesos de consulta simple (ver alfabeto, ver historial, ver estadísticas) siguen el mismo patrón petición-respuesta y se resumen en tablas.
 
+Un proceso posterior a estos diagramas es el reto diario: cuando se guarda una traducción, profile-service recibe el evento TranslationProduced, suma uno al reto del día del usuario y, al llegar a la meta, guarda los puntos y crea el aviso de reto completado. Los puntos acumulados desbloquean medallas. El historial agrupa las traducciones por sesión y las traducciones se borran a los 30 días.
+
 # Contexto del análisis
 
 Técnicamente, el sistema está formado por un cliente desarrollado con React Native y Expo (que se ejecuta en Android, iOS y navegador web) y un backend de microservicios en Node.js, Express y TypeScript: un API Gateway y cinco servicios de dominio (iam, recognition, lexicon, analytics y profile), cada uno con su propia base de datos PostgreSQL, MongoDB para las muestras de entrenamiento y RabbitMQ para la comunicación asíncrona por eventos.

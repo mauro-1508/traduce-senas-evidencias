@@ -50,7 +50,7 @@ El cliente es una única base de código en TypeScript, construida con React Nat
 
 | **Destino** | **Forma de entrega** | **Requisitos del equipo del usuario** |
 |---|---|---|
-| Móvil (Android / iOS) | Aplicación nativa generada con Expo; en desarrollo se ejecuta con Expo Go | Android 7.0+ o iOS, cámara |
+| Móvil (Android / iOS) | Aplicación nativa generada con Expo; en desarrollo se ejecuta con Expo Go | Android 7.0+ o iOS 15.1+, cámara |
 | Web | Sitio estático generado con «expo export --platform web» y servido por Nginx en un contenedor Docker | Navegador actualizado con acceso a cámara |
 | Escritorio | La misma aplicación web abierta en el navegador de un computador (Windows, macOS o Linux), con diseño adaptado a pantallas ≥ 1024 px | Computador con cámara web y navegador Chrome, Edge o Firefox |
 

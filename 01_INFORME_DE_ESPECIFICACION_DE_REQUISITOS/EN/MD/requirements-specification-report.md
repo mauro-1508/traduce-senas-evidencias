@@ -162,7 +162,7 @@ The interface is inclusive, intuitive, and accessible: large buttons (minimum 48
 
 - Android 7.0 (API 24) or later.
 
-- iOS 14 or later.
+- iOS 15.1 or later.
 
 - Up-to-date desktop browsers with WebAssembly and camera access support (Chrome, Edge, Firefox).
 
@@ -330,7 +330,7 @@ Table 4 summarizes the eleven functional requirements of the system and their sp
 | RNF5 | Security | Passwords hashed with bcrypt (cost 10 today; target 12); mandatory JWT valid for one day, with no refresh token; progressive lockout; limit of 10 requests per minute per IP on sign-in and recovery; HTTPS in production |
 | RNF6 | Observability | GET /health endpoint in each service and GET /health/ready for readiness; structured logs with a correlation ID and classified errors |
 | RNF7 | Maintainability | Test coverage ≥ 80% of lines (≥ 90% in the domain); cyclomatic complexity ≤ 10 per method; schema changes only through versioned migrations |
-| RNF8 | Portability | Backend deployed as a Docker image; PostgreSQL 15 or later and MongoDB 6 or later; configuration only through environment variables; mobile app from Android 8.0 (API 26) and iOS 14 |
+| RNF8 | Portability | Backend deployed as a Docker image; PostgreSQL 15 or later and MongoDB 6 or later; configuration only through environment variables; mobile app from Android 7.0 (API 24) and iOS 15.1 |
 | RNF9 | Usability | First translation in under 3 minutes from opening the app (test with 5 users); registration in 4 screens or fewer; error messages in plain language |
 | RNF10 | Disaster recovery | Daily PostgreSQL and MongoDB backups as the target (today, manual dumps), with 30-day retention; RTO under 30 min and RPO under 24 h for PostgreSQL; quarterly restore drill |
 

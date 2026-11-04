@@ -50,7 +50,7 @@ The client is a single TypeScript codebase, built with React Native 0.86 and Exp
 
 | **Target** | **Delivery method** | **User device requirements** |
 |---|---|---|
-| Mobile (Android / iOS) | Native application generated with Expo; in development it runs with Expo Go | Android 7.0+ or iOS, camera |
+| Mobile (Android / iOS) | Native application generated with Expo; in development it runs with Expo Go | Android 7.0+ or iOS 15.1+, camera |
 | Web | Static site generated with “expo export --platform web” and served by Nginx in a Docker container | Up-to-date browser with camera access |
 | Desktop | The same web application opened in the browser of a computer (Windows, macOS or Linux), with a layout adapted to screens ≥ 1024 px | Computer with webcam and Chrome, Edge or Firefox browser |
 

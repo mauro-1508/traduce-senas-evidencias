@@ -162,7 +162,7 @@ La interfaz es inclusiva, intuitiva y accesible: botones grandes (mínimo 48 × 
 
 - Android 7.0 (API 24) o superior.
 
-- iOS 14 o superior.
+- iOS 15.1 o superior.
 
 - Navegadores de escritorio actualizados con soporte de WebAssembly y acceso a cámara (Chrome, Edge, Firefox).
 
@@ -330,7 +330,7 @@ La Tabla 4 resume los once requisitos funcionales del sistema y sus especificaci
 | RNF5 | Seguridad | Contraseñas con bcrypt (coste 10 hoy; objetivo 12); JWT obligatorio de un día, sin token de refresco; bloqueo progresivo; límite de 10 peticiones por minuto por IP en el inicio de sesión y la recuperación; HTTPS en producción |
 | RNF6 | Observabilidad | Endpoint GET /health en cada servicio y GET /health/ready para la disponibilidad; registros estructurados con identificador de correlación y errores clasificados |
 | RNF7 | Mantenibilidad | Cobertura de pruebas ≥ 80 % de líneas (≥ 90 % en el dominio); complejidad ciclomática ≤ 10 por método; cambios de esquema solo mediante migraciones versionadas |
-| RNF8 | Portabilidad | Backend desplegado como imagen Docker; PostgreSQL 15 o superior y MongoDB 6 o superior; configuración solo por variables de entorno; app móvil desde Android 8.0 (API 26) e iOS 14 |
+| RNF8 | Portabilidad | Backend desplegado como imagen Docker; PostgreSQL 15 o superior y MongoDB 6 o superior; configuración solo por variables de entorno; app móvil desde Android 7.0 (API 24) e iOS 15.1 |
 | RNF9 | Usabilidad | Primera traducción en menos de 3 minutos desde que se abre la app (prueba con 5 usuarios); registro en 4 pantallas o menos; mensajes de error en lenguaje claro |
 | RNF10 | Recuperación ante desastres | Copias diarias de PostgreSQL y MongoDB como objetivo (hoy, volcados manuales), con retención de 30 días; RTO menor de 30 min y RPO menor de 24 h para PostgreSQL; simulacro de restauración trimestral |
 

@@ -32,11 +32,11 @@ The goal is for any evaluator or new team member to be able to locate the source
 
 | **Repository** | **URL** | **Content** | **Working branch** |
 |---|---|---|---|
-| frontendTS | https://github.com/tadeo77789/frontendTS | React Native / Expo application (mobile, web and desktop) | fix/traduccion-en-vivo |
-| backendTS | https://github.com/mauro-1508/backendTS | API Gateway, five microservices and shared package | feat/microservices-split |
+| frontendTS | https://github.com/tadeo77789/frontendTS | React Native / Expo application (mobile, web and desktop) | main |
+| backendTS | https://github.com/mauro-1508/backendTS | API Gateway, five microservices and shared package | main |
 | trans-sl-docs | https://github.com/code-sena/trans-sl-docs | Technical documentation, OpenAPI contracts and prototypes | main |
 
-*Note.* The branches correspond to the state as of October 7, 2026. Changes are merged into main through pull requests using squash and merge.
+*Note.* Current branch: main in both repositories, as of November 4, 2026 (backend version 1.4.0, commit a962982; frontend version 1.3.1, commit a5e231d). Changes are merged into main through pull requests using squash and merge.
 
 # Client artifact: cross-platform application
 
@@ -50,7 +50,7 @@ The client is a single TypeScript codebase, built with React Native 0.86 and Exp
 
 | **Target** | **Delivery method** | **User device requirements** |
 |---|---|---|
-| Mobile (Android / iOS) | Native application generated with Expo; in development it runs with Expo Go | Android 9+ or iOS 14+, camera |
+| Mobile (Android / iOS) | Native application generated with Expo; in development it runs with Expo Go | Android 7.0+ or iOS, camera |
 | Web | Static site generated with “expo export --platform web” and served by Nginx in a Docker container | Up-to-date browser with camera access |
 | Desktop | The same web application opened in the browser of a computer (Windows, macOS or Linux), with a layout adapted to screens ≥ 1024 px | Computer with webcam and Chrome, Edge or Firefox browser |
 
@@ -104,7 +104,7 @@ frontend/
 
 | **File** | **Function** |
 |---|---|
-| src/app/config/api.config.ts | Base URL of the backend. In development it still points to port 3000 of the previous backend; it must be changed to port 8080 of the API Gateway. In production it uses /api (web) and https://api.traducsenas.com/api (mobile) |
+| src/app/config/api.config.ts | Base URL of the backend. By default it points to https://traducesenas.tech/api (VPS with Caddy and HTTPS); the EXPO_PUBLIC_API_URL variable changes it at build time, for example to http://localhost:8080/api for a local backend. The production web app uses the relative path /api |
 | feature/Translation/pages/TranslationScreen.tsx | Translation screen with Words / Alphabet selector |
 | feature/Translation/hooks/useSignAgent.ts, useGestureAgent.ts | Capture, recognition and result publication cycle |
 | services/vision/mediapipeProvider(.web).ts | Obtains the 21 hand landmarks in each frame |
@@ -114,7 +114,7 @@ frontend/
 | services/translations.service.ts | Stores and queries the history in the backend |
 | feature/auth/services | Real login against the backend and token handling |
 
-*Note.* The current client version is 1.2.0. Each web screen has its own URL; the password routes were renamed. The profile shows the daily challenge progress, the total of challenge points and a queue of notices for completed challenges and unlocked achievements.
+*Note.* The current client version is 1.3.1. Each web screen has its own URL; the password routes were renamed. The profile shows the daily challenge progress, the total of challenge points and a queue of notices for completed challenges and unlocked achievements.
 
 ## Main dependencies
 
@@ -242,17 +242,17 @@ services/lexicon-service/
 
 | **Component** | **.ts files (src)** | **Lines (src)** | **Test files** |
 |---|---|---|---|
-| api-gateway | 7 | 265 | 1 |
-| iam-service | 77 | 2 094 | 22 |
-| recognition-service | 58 | 3 016 | 11 |
-| lexicon-service | 23 | 1 629 | 6 |
-| analytics-service | 13 | 487 | 4 |
-| profile-service | 20 | 823 | 4 |
-| @traduce/shared | 21 | 671 | 5 |
-| **Total backend** | **219** | **8 985** | **53** |
+| api-gateway | 7 | 265 | 3 |
+| iam-service | 77 | 2 094 | 33 |
+| recognition-service | 58 | 3 016 | 17 |
+| lexicon-service | 23 | 1 629 | 5 |
+| analytics-service | 13 | 487 | 6 |
+| profile-service | 20 | 823 | 27 |
+| @traduce/shared | 21 | 671 | 7 |
+| **Total backend** | **219** | **8 985** | **99** |
 | Client (frontend/src, .ts and .tsx) | 109 | 16 713 | — |
 
-*Note.* Count performed on October 7, 2026 on the branches indicated in Table 1.
+*Note.* The .ts files of src and their lines come from the count of October 7, 2026. The test files come from the count of November 4, 2026 on the main branch (91 in the services, 7 in @traduce/shared and 1 in the root tests folder).
 
 ## Exposed interfaces
 
@@ -266,7 +266,7 @@ services/lexicon-service/
 | /api/users, /api/iam | iam-service | me, me/password, roles, role assignment to users |
 | /api/translations | recognition-service | Save translation, history, logical deletion |
 | /api/sign-templates, /api/samples, /api/recognition | recognition-service | Sign templates and training samples |
-| /api/lexicon | lexicon-service | alphabet, search, categories, señas, publicar, localizaciones, recursos |
+| /api/lexicon | lexicon-service | alphabet, search, categories, signs, publish, locations, resources |
 | /api/analytics | analytics-service | events, summary, daily, top-signs, reports/sections |
 | /api/profile, /api/notifications, /api/achievements | profile-service | me, me/stats, notifications, achievements, challenges/today and challenges/rewards/summary (daily challenges and challenge points) |
 
@@ -306,7 +306,7 @@ npx expo start --android     # or --ios; opens in Expo Go
 
 npx eas build --platform android
 
-The EAS Build configuration (eas.json) is not yet in the repository; it is created when the first distribution installer is generated.
+The EAS Build configuration is in the eas.json file of the client repository.
 
 ## Web and desktop application
 

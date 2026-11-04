@@ -108,15 +108,7 @@ docker compose up --build -d
 
 docker compose ps     # all containers must be in running/healthy state
 
-The SQL files in each service's db/ folder are applied only when the database volume is created for the first time. On a volume that already exists, new migrations are applied by hand, with the platform running, after taking a backup and without recreating the volume. The profile-service ones that may be missing today are 008 (admin reports), 009 (daily challenges) and 010 (challenge-point medals):
-
-docker compose exec -T postgres-profile psql -X -v ON_ERROR_STOP=1 -U postgres -d profile < services/profile-service/db/008_admin_reports.sql
-
-docker compose exec -T postgres-profile psql -X -v ON_ERROR_STOP=1 -U postgres -d profile < services/profile-service/db/009_daily_challenges.sql
-
-docker compose exec -T postgres-profile psql -X -v ON_ERROR_STOP=1 -U postgres -d profile < services/profile-service/db/010_challenge_reward_achievements.sql
-
-Always apply them in order (001 to 010) and deploy profile-service before the frontend. The full list of manual commands is at the top of docker-compose.yml.
+The SQL files in each service's db/ folder are applied only when the database volume is created for the first time. On a volume that already exists, new migrations are applied by hand, with the platform running, after taking a backup and without recreating the volume. The complete, ordered list of those commands is in 10-devops/local-setup.md. Always apply them in order and deploy profile-service before the frontend.
 
 ## Step 5. Verify the backend
 

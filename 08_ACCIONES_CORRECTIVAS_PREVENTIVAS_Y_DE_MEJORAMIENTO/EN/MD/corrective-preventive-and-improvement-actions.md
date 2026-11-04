@@ -85,7 +85,7 @@ The code and security audit of phase 4 of the migration to microservices found 2
 | AC-10 | The downloader for the LSC-54 set silently skipped videos | Byte-range read error | Correction of the range calculation and test with a real sample | High | Closed |
 | AC-11 | The download stopped with HTTP 429 | 16 simultaneous connections exceeded the server limit | 4 connections, larger blocks, and waiting on code 429 | Medium | Closed |
 
-*Note.* Verification: the automated backend suite finished with 494 tests passed and 0 failed on October 7, 2026.
+*Note.* Verification: the automated backend suite finished with 494 tests passed and 0 failed on October 7, 2026 (milestone of the audit). Current status, November 4, 2026: 918 tests passed, 0 failed and 13 skipped because they require PostgreSQL on the local machine.
 
 # Preventive actions
 
@@ -122,7 +122,7 @@ Preventive actions address project risks before they turn into failures.
 | AM-05 | Recognition engine that considers hand location and movement | Distinguish signs such as “good morning,” “good afternoon,” and “good night” | High | Next version |
 | AM-06 | Two-hand sign recognition | Cover most of the signs in the LSC-54 set | Medium | Next version |
 | AM-07 | Load tests with k6 in the pipeline | Detect degradation before production | Medium | Two sprints |
-| AM-08 | Continuous integration in GitHub Actions (build + tests) | No change is integrated with failing tests | High | Next sprint |
+| AM-08 | Continuous integration in GitHub Actions (build + tests) | No change is integrated with failing tests | High | Closed: ci.yml in the backend and frontend repositories |
 | AM-09 | Complete missing prototypes (notifications and 2 other screens) | Full design of the 21 screens | Low | Two sprints |
 | AM-10 | Pilot test with deaf users at an educational institution | Real-world validation of specific objective 4 | High | Next version |
 

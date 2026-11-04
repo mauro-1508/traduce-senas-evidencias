@@ -58,13 +58,15 @@ Se propone una aplicación multiplataforma que usa la cámara del dispositivo pa
 
 | **Módulo** | **Funcionalidad** | **Servicio** |
 |---|---|---|
-| Gestión de usuarios | Registro, verificación de correo, inicio de sesión, recuperación de contraseña, roles | iam-service |
+| Gestión de usuarios | Registro, verificación de correo, inicio de sesión (también con Google y Facebook), recuperación de contraseña, roles y borrado de cuenta | iam-service |
 | Traducción | Reconocimiento de señas, texto y voz, historial | App + recognition-service |
 | Entrenamiento | Captura de muestras, plantillas de señas, registro de modelos | recognition-service |
 | Léxico y alfabeto | Catálogo de señas, categorías, alfabeto con modelos 3D | lexicon-service |
-| Perfil | Datos personales, tema, idioma, notificaciones y logros | profile-service |
+| Perfil | Datos personales, tema, idioma, notificaciones (también reportes semanales y mensuales por correo a los administradores), logros y retos diarios | profile-service |
 | Estadísticas | Eventos de uso y tableros para el administrador | analytics-service |
 | Entrada única | Enrutamiento, validación de JWT, límite de peticiones, CORS | api-gateway |
+
+Quedan fuera de alcance la traducción inversa (de texto o voz hacia señas), la cobertura completa del vocabulario de la LSC y el uso sin conexión.
 
 # Tecnologías seleccionadas
 
@@ -81,7 +83,7 @@ Se propone una aplicación multiplataforma que usa la cámara del dispositivo pa
 | Visión | TensorFlow.js | 4.22 | Ejecución de modelos de clasificación en el cliente |
 | Voz | expo-speech | 57.x | Síntesis de voz nativa para la salida en audio |
 | Backend | Node.js + Express | 20 LTS / 5.2 | Mismo lenguaje que el cliente; suficiente para el tráfico del proyecto |
-| Backend | TypeScript | 5.6+ | Tipado estático que reduce errores en una base de código compartida |
+| Backend | TypeScript | 5.6+ (servidor) y 6.0 (cliente) | Tipado estático que reduce errores en una base de código compartida |
 | Datos | PostgreSQL | 16 | Base relacional robusta y gratuita, una por servicio |
 | Datos | MongoDB | 7 | Documentos flexibles para las muestras de entrenamiento |
 | Mensajería | RabbitMQ | 3.x | Eventos entre servicios; sencillo y con panel web |

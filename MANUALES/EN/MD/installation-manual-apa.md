@@ -10,7 +10,7 @@ Juan Camilo Fierro Esquivel
 
 Instructor: Karol Daniela Correa
 
-October 7, 2026
+November 4, 2026
 
 </div>
 
@@ -19,15 +19,14 @@ October 7, 2026
 - [Introduction](#introduction)
 - [1. Key Concepts](#1-key-concepts)
    - [1.1 General Characteristics (Ports)](#11-general-characteristics-ports)
-   - [1.2 Database Platform (Migrations)](#12-database-platform-migrations)
+   - [1.2 Database and Migrations](#12-database-and-migrations)
    - [1.3 Configuration Variables (Names Only)](#13-configuration-variables-names-only)
 - [2. Installation](#2-installation)
    - [2.1 Requirements](#21-requirements)
    - [2.2 Getting the Code](#22-getting-the-code)
    - [2.3 Installation With Docker (Recommended Route)](#23-installation-with-docker-recommended-route)
-   - [2.4 Alternative Route Without the Uncommitted Changes](#24-alternative-route-without-the-uncommitted-changes)
-   - [2.5 Development Mode Without Docker](#25-development-mode-without-docker)
-   - [2.6 Installation on a Production Server](#26-installation-on-a-production-server)
+   - [2.4 Development Mode Without Docker](#24-development-mode-without-docker)
+   - [2.5 Installation on a Production Server](#25-installation-on-a-production-server)
 - [3. Configuration and First Use](#3-configuration-and-first-use)
    - [3.1 Checking That It Works](#31-checking-that-it-works)
    - [3.2 Creating and Activating the First Account](#32-creating-and-activating-the-first-account)
@@ -39,17 +38,9 @@ October 7, 2026
 
 ## Introduction
 
-This manual explains how to get Traduce Señas running **on a local computer** with Docker. It does not cover production. It does not include configuration values: you define the keys and passwords yourself, and they are **never** written in this manual or in the repository.
+This manual explains how to get Traduce Señas running on a local computer with Docker Compose, and how to run it in development mode. It has been tested with Backend `v1.4.0` (`main` branch, commit `a962982`) and Frontend `v1.3.1` (`main` branch, commit `a5e231d`).
 
-> ## Important warning
->
-> Today the **complete Docker installation** depends on changes that **are not in any commit yet**:
->
-> - The new `Dockerfile` with `HEALTHCHECK` and the new `.dockerignore` exist only as **uncommitted** changes on the Backend disk (local branch `chore/docker-backend`). That branch is **older** than `develop`: it has no email verification, no `/api/iam`, no `users.status` and none of migrations 003-006. **It is not useful for running the system described in these manuals.** The committed Dockerfile is identical in both branches, which is why the uncommitted changes can be carried over to `develop` (section 2.3).
-> - The `Dockerfile` that is in `origin/develop` **does not define `HEALTHCHECK`**, and `docker-compose.yml` makes the frontend wait for the backend to be "healthy" (`service_healthy`). With the `develop` Dockerfile, the frontend **does not start** with `docker compose up`.
-> - The `docker-compose.yml`, `build-frontend.sh` and `build-backend.sh` files **are not in any of the three repositories**: they live in the local `infra/` folder of the project folder (`sena/`). Anyone who only clones the repos does not have them; ask the team for them.
->
-> Section 2.3 is the recommended route and section 2.4 an alternative.
+It does not include configuration values. You define the keys and passwords yourself, in your `.env` file, and they are **never** written in this manual or in the repository.
 
 ## 1. Key Concepts
 
@@ -57,50 +48,83 @@ This manual explains how to get Traduce Señas running **on a local computer** w
 
 **Table 1**
 
-*General Characteristics (Ports)*
+*System Ports on the Computer*
 
-| Component | On your computer | Inside Docker |
-|-----------|------------------|---------------|
-| Web (nginx) | `http://127.0.0.1:8080` | port 80 |
-| Backend (API) | `http://127.0.0.1:3000` | port 3000 |
-| PostgreSQL 16 | `127.0.0.1:5433` | port 5432 |
+| Component | Port | Published on the computer |
+|-----------|------|---------------------------|
+| api-gateway (single entry point to the API) | 8080 | Yes. Compose publishes it on all interfaces of the machine. |
+| PostgreSQL for `iam`, `recognition`, `lexicon`, `analytics` and `profile` | 5433, 5434, 5435, 5436 and 5437 | Only on `127.0.0.1` |
+| MongoDB (gesture samples) | 27017 | Only on `127.0.0.1` |
+| RabbitMQ panel | 15672 | Only on `127.0.0.1` |
+| Services `iam`, `recognition`, `lexicon`, `analytics` and `profile` (3001 to 3005) and AMQP (5672) | — | Not published: only reachable inside the Docker network |
+| Expo development server (web) | 8081 | Not part of the compose file |
 
-All ports are published **only on `127.0.0.1`**: nobody else on the network can connect. To test the app from a real phone you would have to remove `127.0.0.1:` from the backend port, and do so only on trusted networks.
+To call the API from outside Docker, always use `http://localhost:8080/api/...`. If the network of the computer is not trusted, you can change the gateway port in `docker-compose.yml` to `127.0.0.1:8080:8080`.
 
-The web (nginx; F5, Inc., n.d.) serves the application and forwards everything starting with `/api/` to the backend. There is no Redis or MongoDB.
+### 1.2 Database and Migrations
 
-### 1.2 Database Platform (Migrations)
+Each service has its own database. The SQL files are in `services/<service>/db/`, and the compose file mounts them in each database container. PostgreSQL runs those files **only when the data volume is created for the first time**. The full list of mounted files is in the Technical manual, section 4.2.
 
-The compose file mounts `../repos/Backend/migrations` (relative to `infra/`) at `/docker-entrypoint-initdb.d`. PostgreSQL runs those `.sql` files in order **only when the volume is empty** (the first time; The PostgreSQL Global Development Group, n.d.).
+Practical consequences:
 
-- In `origin/develop` there are seven migrations: `000_users.sql`, `001_translations.sql`, `002_sign_templates.sql`, `003_iam_roles_permissions.sql`, `004_analytics_usage_events.sql`, `005_auth_email_normalization_user_tokens.sql` and `006_users_status_email_verification.sql`.
-- **The schema depends on the branch that is on disk** in `repos/Backend/` (which must be an up-to-date `develop`, `2c4e62d`): otherwise migrations 003 to 006 are missing and the roles, statistics and email verification features will not work. The local `chore/docker-backend` branch (and the outdated local `develop`, `ad9815d`) only have migrations 000 to 002: with them sign-up fails, `/api/iam/me/access` returns 404 and the first-use SQL statements (`users.status`, `user_roles`) do not work.
-- If you change branches or a migration fails, you must **reset the volume**.
-- In the microservice version, `profile-service` goes up to migration `010`. If you already have a profile volume, **do not recreate it**: apply by hand, in order and after a backup, migrations `008_admin_reports.sql`, `009_daily_challenges.sql` and `010_challenge_reward_achievements.sql` with `docker compose exec -T postgres-profile psql -X -v ON_ERROR_STOP=1 -U postgres -d profile < services/profile-service/db/<file>.sql`. The implementation procedure explains the details.
+- On a new installation you do not have to do anything: the schema is created on the first `docker compose up`.
+- If you already have volumes created with an earlier version, **do not delete them** to get the new migrations: apply them by hand, in order, with the platform running (`docker compose up -d`). The commands are below.
+- If you delete the volumes with `docker compose down -v`, all the data is lost.
+
+**Migrations for a volume that already exists.** Run them from the root of the Backend repository, in this order. Each file runs once, except `009_outbox_events.sql` in `iam`, which is idempotent and can be run again if it was applied with an earlier version.
+
+```bash
+docker compose exec -T postgres-iam       psql -U postgres -d iam       < services/iam-service/db/009_outbox_events.sql
+docker compose exec -T postgres-iam       psql -U postgres -d iam       < services/iam-service/db/010_users_password_nullable.sql
+docker compose exec -T postgres-iam       psql -U postgres -d iam       < services/iam-service/db/011_account_deletion_token.sql
+docker compose exec -T postgres-iam       psql -U postgres -d iam       < services/iam-service/db/012_outbox_claim_token.sql
+docker compose exec -T postgres-iam       psql -U postgres -d iam       < services/iam-service/db/013_users_terms_version.sql
+docker compose exec -T postgres-analytics psql -U postgres -d analytics < services/analytics-service/db/002_erased_users.sql
+docker compose exec -T postgres-profile   psql -U postgres -d profile   < services/profile-service/db/002_erased_users.sql
+docker compose exec -T postgres-profile   psql -U postgres -d profile   < services/profile-service/db/003_ui_languages.sql
+docker compose exec -T postgres-profile   psql -X -v ON_ERROR_STOP=1 -U postgres -d profile < services/profile-service/db/004_achievement_catalog.sql
+docker compose exec -T postgres-profile   psql -X -v ON_ERROR_STOP=1 -U postgres -d profile < services/profile-service/db/005_obtainable_achievements.sql
+docker compose exec -T postgres-profile   psql -X -v ON_ERROR_STOP=1 -U postgres -d profile < services/profile-service/db/006_translation_milestones.sql
+docker compose exec -T postgres-profile   psql -X -v ON_ERROR_STOP=1 -U postgres -d profile < services/profile-service/db/007_functional_achievements.sql
+docker compose exec -T postgres-profile   psql -X -v ON_ERROR_STOP=1 -U postgres -d profile < services/profile-service/db/008_admin_reports.sql
+docker compose exec -T postgres-profile   psql -X -v ON_ERROR_STOP=1 -U postgres -d profile < services/profile-service/db/009_daily_challenges.sql
+docker compose exec -T postgres-profile   psql -X -v ON_ERROR_STOP=1 -U postgres -d profile < services/profile-service/db/010_challenge_reward_achievements.sql
+docker compose exec -T postgres-recognition psql -U postgres -d recognition < services/recognition-service/db/003_erased_users.sql
+docker compose exec -T postgres-recognition psql -X -v ON_ERROR_STOP=1 -U postgres -d recognition < services/recognition-service/db/004_sign_templates_word_kind.sql
+docker compose exec -T postgres-recognition psql -X -v ON_ERROR_STOP=1 -U postgres -d recognition < services/recognition-service/db/005_translation_retention.sql
+```
+
+Notes on this list:
+
+- This list is the complete one. The comment at the top of `docker-compose.yml` omits `iam-service/db/012_outbox_claim_token.sql` and `profile-service/db/007_functional_achievements.sql`, although both files are mounted.
+- If you use PowerShell, the `<` operator does not work. Replace it with a pipe, for example: `Get-Content services/iam-service/db/009_outbox_events.sql | docker compose exec -T postgres-iam psql -U postgres -d iam`.
+- Migrations 009 and 010 of `profile` add daily challenges and point-based medals. Before applying them, stop the service with `docker compose stop profile-service`, and start it again with `docker compose up -d profile-service` when you are done.
+- Keep the order shown: the `iam` files depend on the earlier ones, and `009_outbox_events.sql` must exist before `iam` publishes `iam.UserDeleted`.
 
 ### 1.3 Configuration Variables (Names Only)
 
-The backend reads these variables (`Backend@develop:src/shared/config/config.ts`). They are defined in `repos/Backend/.env`, which is **never** pushed to git:
+The `.env.example` file at the root of the Backend repository documents all the variables. For Docker Compose, copy that file to `.env` at the root of the Backend.
 
 **Table 2**
 
 *Configuration Variables (Names Only)*
 
-| Variable | Purpose |
-|----------|---------|
-| `PORT` | Backend port (3000 if missing). |
-| `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | PostgreSQL connection. **With Docker Compose, the compose file sets them for you**; you do not need to put them in `.env`. |
-| `JWT_SECRET` | Secret used to sign sessions. **Required.** Choose a long, random text. |
-| `EMAIL_USER`, `EMAIL_PASS` | Email account (`gmail` service) used to send the verification codes and, in the microservice version, the weekly and monthly reports to administrators. |
-| `APP_URL` | Public address of the web app (default `https://traducesenas.tech`). It is the target of the button in the emails to administrators. Only `profile-service` uses it. |
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `JWT_SECRET` | Yes | Shared secret used to sign and verify sessions. At least 32 characters. All services use the same one. |
+| `POSTGRES_PASSWORD` | Yes | Password of the five PostgreSQL servers (user `postgres`). |
+| `MONGO_ROOT_PASSWORD` | Yes | Password of the MongoDB user. |
+| `RABBITMQ_PASSWORD` | Yes | Password of the RabbitMQ user. |
+| `MONGO_ROOT_USER`, `RABBITMQ_USER` | No | Names of those users (default `signa`). |
+| `CORS_ORIGINS` | No | Web origins (comma separated) allowed to call the API. By default, local Expo web. |
+| `EMAIL_USER`, `EMAIL_PASS` | No | Gmail account that sends the codes and the email notices. Use an app password. |
+| `GOOGLE_CLIENT_IDS` | No | Google OAuth client identifiers. If empty, Google sign-in responds with 503. |
+| `FACEBOOK_APP_ID`, `FACEBOOK_APP_SECRET` | No | Facebook application details. If empty, Facebook sign-in responds with 503. |
+| `RECOGNITION_TRANSLATION_RETENTION_DAYS` | No | Days that translations are kept. Default 30. With `0`, they are not deleted. |
+| `ADMIN_REPORTS_ENABLED`, `APP_URL` | No | Turns on the emailed reports for administrators and sets the address of the button in those emails. |
+| `DOMAIN`, `FRONTEND_DIR`, `CORS_ORIGINS_PROD`, `GATEWAY_TRUST_PROXY` | No | Production only (see section 2.5). |
 
-Steps:
-
-1. Copy the example file: `cp repos/Backend/.env.example repos/Backend/.env` (from `sena/`).
-2. Open `repos/Backend/.env` and fill in `JWT_SECRET` with your own value.
-3. If you want the code emails to be delivered, fill in `EMAIL_USER` and `EMAIL_PASS` (Gmail usually requires an "app password"). If you don't, sign-up works but the code does not arrive: activate the account manually (section 3.2).
-
-The database credentials in the compose file are development values defined in `docker-compose.yml` itself. Do not copy them into any document or use them on a real server.
+The database credentials are not in `.env`: the compose file sets them from `POSTGRES_PASSWORD`. The frontend has its own variable, `EXPO_PUBLIC_API_URL`, which is explained in section 2.3.
 
 ## 2. Installation
 
@@ -113,128 +137,137 @@ The database credentials in the compose file are development values defined in `
 | You need | Details |
 |----------|---------|
 | **Git** | To clone the repositories. |
-| **Node.js 20 or later** | JavaScript runtime (OpenJS Foundation, n.d.). Only for development mode without Docker (section 2.5). The images use Node inside the container. |
-| **Docker Desktop** | With `docker` and `docker compose` available (Docker Inc., n.d.). |
-| **Disk space** | Reserve several free GB: Docker images, `node_modules` and the recognition model. |
+| **Docker Desktop** | With `docker` and `docker compose` available (Docker 24 or later and Compose 2.20 or later, according to the team's local setup guide). |
+| **Node.js 20 or later** | Only for development mode without Docker (section 2.4) and for the frontend (`npm install`). |
+| **A terminal** | PowerShell or Git Bash. The commands in section 1.2 that use `<` run in Git Bash. |
+| **Disk space** | Several free GB for Docker images and dependencies. |
 | **Internet** | To download images and dependencies, and for the browser to fetch MediaPipe when using the camera. |
-| **A bash-like terminal** | On Windows, Git Bash. The `build-*.sh` scripts are bash. |
-| **An email account to send codes** | Optional for testing (see section 1.3). Sending uses the `gmail` service of `nodemailer`. |
+| **An email account to send codes** | Optional. Without it, sign-up works, but the code does not arrive by email (see section 3.2). |
+| **Expo Go on a phone** | Optional, to test the app on a phone. |
 
 ### 2.2 Getting the Code
 
-This is the **recommended** layout (the one used on the development team's machine): a `sena/` folder with the three repositories inside `repos/` and the infrastructure files in `infra/`. `sena/` is not a git repository. Your teammates may have a different layout: the compose file and the scripts are outside the repos and only need to find `Backend` and `Frontend` through relative paths (the compose file uses `../repos/...` from `infra/`; if you change the layout, adjust those paths).
+There are two public repositories, both on the `main` branch:
 
 ```
-sena/
-  repos/
-    Backend/    <- github.com/mauro-1508/backendTS      (develop branch)
-    Frontend/   <- github.com/tadeo77789/frontendTS     (develop branch)
-    Docs/       <- github.com/code-sena/trans-sl-docs   (main branch)
-  infra/
-    docker-compose.yml    <- NOT in any repo; ask the team for it
-    build-frontend.sh     <- same
-    build-backend.sh      <- same
+git clone -b main https://github.com/mauro-1508/backendTS.git
+git clone -b main https://github.com/tadeo77789/frontendTS.git
 ```
 
-```
-mkdir -p sena/repos sena/infra && cd sena
-git clone -b develop https://github.com/mauro-1508/backendTS.git repos/Backend
-git clone -b develop https://github.com/tadeo77789/frontendTS.git repos/Frontend
-git clone -b main https://github.com/code-sena/trans-sl-docs.git repos/Docs
-```
+Confirm the versions with `git -C backendTS rev-parse --short HEAD` (it must show `a962982`) and `git -C frontendTS rev-parse --short HEAD` (it must show `a5e231d`). If `main` has moved on, use the version indicated in the Technical manual.
 
-The commands in this manual are run **from the `sena/` root** (the git and `cp` ones) or **from `sena/infra/`** (the `docker compose` ones and the `build-*.sh` scripts). Each block states where to run it from.
-
-In the Backend repository, the `main` branch only has a README. The code is in `develop`: check with `git -C repos/Backend branch --show-current`.
-
-> **Cloud-synced folders (OneDrive and similar).** If you put `sena/` in a synced folder, Docker (BuildKit) cannot read some of its files. That is why the `build-*.sh` scripts exist (section 2.3). Also, mark `repos/Backend/migrations` as "Always keep on this device"; otherwise the migrations mount may appear empty.
+The Backend repository contains `docker-compose.yml`, `docker-compose.prod.yml`, `.env.example` and the Dockerfile of each service. You do not need any file from another location.
 
 ### 2.3 Installation With Docker (Recommended Route)
 
-Requirements: `docker-compose.yml` and `build-*.sh` in `infra/`, and the Backend **on an up-to-date `develop` branch** (commit `2c4e62d`), keeping the uncommitted changes to `Dockerfile` and `.dockerignore`.
+**Step A. Create the configuration file.** From the root of the Backend repository:
 
-**Step A. Switch the Backend to `develop` and update it.** The local `develop` may be behind `origin/develop`:
-
-(from `sena/`)
-
-```
-git -C repos/Backend checkout develop
-git -C repos/Backend pull --ff-only origin develop
-git -C repos/Backend rev-parse --short HEAD     # must show 2c4e62d
+```bash
+cd backendTS
+cp .env.example .env
 ```
 
-The uncommitted changes to `Dockerfile` and `.dockerignore` are kept because the committed version of those files is the same in `chore/docker-backend` and in `develop`. If Git refuses because of other modified files (for example `.gitignore`, which does differ between the branches), save a copy of that file, discard your changes to it and repeat the command. After the `pull`, add back to the end of `.gitignore` the lines from your copy that are missing (the `liquibase.properties` ones): they protect files with credentials and must not be lost.
+In PowerShell, use `Copy-Item .env.example .env`. Open `.env` and fill in, at a minimum:
 
-**Step B. Build and start**, from `sena/infra/`:
+- `JWT_SECRET`: a text of 32 characters or more. You can generate it with `openssl rand -hex 32`.
+- `POSTGRES_PASSWORD`, `MONGO_ROOT_PASSWORD` and `RABBITMQ_PASSWORD`: passwords of your own. Do not use the characters `@ : / ? #`, because they go inside the connection URLs.
+
+If you want the codes to arrive by email, also fill in `EMAIL_USER` and `EMAIL_PASS`. Do not upload `.env` to any repository.
+
+**Step B. Build and start the platform:**
+
+```bash
+docker compose up --build -d
+docker compose ps
+```
+
+The first time it takes several minutes, because it builds the images. The compose file starts 13 containers: the gateway, the five services, the five PostgreSQL servers, MongoDB and RabbitMQ. Each service waits until its database is healthy, and the gateway waits until the five services respond. Repeat `docker compose ps` until every container shows `running` or `healthy`.
+
+To stop without deleting data: `docker compose down`. To delete the data as well: `docker compose down -v` (see section 3.4).
+
+**Step C. Start the frontend.** In another terminal, from the folder that contains the Backend repository (the one that holds `frontendTS`):
+
+```bash
+cd ../frontendTS
+npm install
+```
+
+Create a `.env` file at the root of the frontend with this line:
 
 ```
-cd infra
-./build-frontend.sh
-./build-backend.sh --dockerfile-from develop
-docker compose up -d
+EXPO_PUBLIC_API_URL=http://localhost:8080/api
 ```
 
-What each command does:
+To test from a phone on the same network, use the IP address of your computer instead of `localhost` (for example, `http://192.168.1.20:8080/api`). The variable is read at build time: if you change it, restart Expo.
 
-1. `./build-frontend.sh` builds the `traduce-senas-frontend:latest` image. It sends the files of `repos/Frontend/` to Docker as a `tar` (without `node_modules`, `.git`, `dist` or `.expo`) and builds the web app with Expo (Expo, n.d.) inside the image. It takes several minutes the first time.
-2. `./build-backend.sh --dockerfile-from develop` builds `traduce-senas-backend:latest`. With that option, the current branch matches the "Dockerfile branch" and the script packages the working folder directly, that is, **with the uncommitted Dockerfile that has `HEALTHCHECK`**. Without the option, the script looks for the Dockerfile in `chore/docker-backend` and, being on `develop`, aborts because that committed Dockerfile is the same as `develop`'s.
-   - The script **will always show** "AVISO: se esperaba feat/email-verification…": that branch no longer exists and the warning is harmless.
-   - It also warns if there are uncommitted changes (they are included in the image, which is expected) and if `repos/Backend/.env` is missing.
-3. `docker compose up -d` starts PostgreSQL, the backend and the web. The frontend waits for the backend to be healthy.
+```bash
+npm run web
+```
 
-**Why there are scripts instead of `docker compose build`:** the project folder is usually cloud-synced and BuildKit cannot read those files (reparse points). The scripts avoid the problem by sending the context as a `tar`.
+Expo opens the web app at `http://localhost:8081`. The backend already accepts that origin by default. For the mobile app, use `npm start` and Expo Go.
 
-If you change the code, run the corresponding script again and then `docker compose up -d`.
+### 2.4 Development Mode Without Docker
 
-### 2.4 Alternative Route Without the Uncommitted Changes
+It is useful for programming with automatic reload. You need Node.js 20 or later and the Docker databases, which is the simplest option because the compose file already creates their schema.
 
-If you only have the three repos cloned (Backend on `origin/develop`) and the `docker-compose.yml`, follow these steps:
+1. **Databases.** From the root of the Backend, start only the PostgreSQL servers:
 
-1. Build the images with the names the compose file uses:
+   ```bash
+   docker compose up -d postgres-iam postgres-recognition postgres-lexicon postgres-analytics postgres-profile
    ```
-   docker build -t traduce-senas-backend:latest repos/Backend
-   docker build -t traduce-senas-frontend:latest repos/Frontend
-   ```
-   (These two commands are run from `sena/`. If `sena/` is in a cloud-synced folder, this step may fail for the reason explained above; move the project to a local folder, e.g. `C:\dev\sena`. The following `docker compose` commands are run from `sena/infra/`.)
-2. Start the database and the backend first: `docker compose up -d postgres backend`.
-3. Start the web without waiting for the "healthcheck" that the `origin/develop` Dockerfile does not define: `docker compose up -d --no-deps frontend`.
 
-On this route the backend **will not have `healthy` status** (there is no `HEALTHCHECK`): in 3.1, only check that it is `running` and that the API responds.
+   They listen on `127.0.0.1`, on ports 5433 to 5437.
 
-### 2.5 Development Mode Without Docker
+2. **Dependencies.** At the root of the Backend: `npm install`.
 
-Use it to program with automatic reload. You need Node 20+ and a PostgreSQL database.
+3. **Configuration of each service.** Copy the `.env.example` of each service to its `.env` (`services/api-gateway`, `services/iam-service`, `services/recognition-service`, `services/lexicon-service`, `services/analytics-service` and `services/profile-service`). Inside each file, the variables have the name without the prefix: `IAM_DB_HOST` becomes `DB_HOST`. Use the same `JWT_SECRET` in all of them and, in `DB_PASSWORD`, the same value as `POSTGRES_PASSWORD`. With `RABBITMQ_URL` and `MONGO_URL` empty, events and samples are kept in memory and are lost on restart.
 
-1. **Database:** you can use the compose one: `docker compose up -d postgres` (from `infra/`; it runs at `127.0.0.1:5433`).
-2. **Backend:** in `repos/Backend/`:
-   ```
-   npm install
-   cp .env.example .env
-   npm run dev
-   ```
-   In `.env` set `DB_HOST` (127.0.0.1), `DB_PORT` (5433), `DB_NAME` (traduce_senas), `DB_USER`, `DB_PASSWORD` (the compose ones), `JWT_SECRET`, and optionally `EMAIL_USER`/`EMAIL_PASS`. Other commands: `npm run build`, `npm start`, `npm test` (uses vitest).
-3. **Frontend:** in `repos/Frontend/`: `npm install` and then `npm run web` (Expo). The terminal shows you the address. In development the web calls `http://localhost:3000/api`. Other commands: `npm start`, `npm run android`, `npm run ios`, `npm run typecheck`.
+4. **Start.** From the root of the Backend: `npm run dev:all`. It starts the gateway and the five services with automatic reload. For one service only: `npm run dev -w @traduce/iam-service`.
 
-#### 2.5.1 Port 3000 Conflict
+If the full Docker stack is still running, port 8080 is taken by the gateway container. Stop it with `docker compose stop api-gateway`.
 
-The development backend uses port **3000**, the same one the `backend` container publishes. **If both run at the same time, they conflict.** Stop the container before `npm run dev`:
+### 2.5 Installation on a Production Server
 
-```
-docker compose stop backend
+The production compose file is added to the base file with `-f`. From the root of the Backend:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
-(The Docker web uses 8080, so with the development backend on 3000 you can keep the Docker database.)
+Requirements and additional variables:
 
-### 2.6 Installation on a Production Server
+- The Frontend repository cloned next to the Backend, or the path set in `FRONTEND_DIR` (by default `../frontendTS`).
+- `DOMAIN` (by default `traducesenas.tech`), with the DNS pointing to the server, and `www` redirected to the domain.
+- Ports 80 and 443 open, also in the provider's panel. Caddy needs port 80 to obtain the certificate.
+- `CORS_ORIGINS_PROD` only if you need to allow more web origins.
 
-This version of the project does not include a procedure for installing on a production server: the system runs on a local computer, as described in the previous sections.
+With this file the gateway stops being published on port 8080: everything enters through HTTPS. The full deployment procedure (backups, smoke tests and rollback) is in the Deployment plan (evidence 07).
+
+Production server status: checked on November 4, 2026: HTTPS is active, HTTP redirects to HTTPS and `/api/health` answers `ok` with version 1.4.0 and all five services up.
 
 ## 3. Configuration and First Use
 
 ### 3.1 Checking That It Works
 
-1. Service status: `docker compose ps`. All three must be up (`running`). With the route in section 2.3, the backend and the database also show as `healthy`; with the route in section 2.4 the backend does not.
-2. Open `http://127.0.0.1:8080`: the home page must load.
+1. **Container status.** `docker compose ps`. The five services, the gateway and the databases must show `running` or `healthy`.
+
+2. **Aggregated status.** From the computer:
+
+   ```bash
+   curl http://localhost:8080/health
+   ```
+
+   The answer is HTTP 200 with `"status":"ok"` when all services respond. If one is down, the gateway still answers 200, but with `"status":"degraded"` and `"down"` for that service. When starting for the first time, `degraded` for a few seconds is normal: repeat the check.
+
+3. **Functional check.** The gateway forwards the request to `iam` and validates it before doing anything else:
+
+   ```bash
+   curl -i -X POST http://localhost:8080/api/auth/login -H "Content-Type: application/json" -d "{}"
+   ```
+
+   It must answer `400` with `"code":"INVALID_BODY"`. That response proves the request reached `iam`.
+
+4. **From the web.** Open `http://localhost:8081` (with `npm run web`). The home page must load.
 
 **Figure 1**
 
@@ -242,31 +275,35 @@ This version of the project does not include a procedure for installing on a pro
 
 ![Application home page](capturas/usuario-01-inicio.png)
 
-3. Check that the API responds through the web: `curl http://127.0.0.1:8080/api/sign-templates` must return a JSON response (the list may be empty).
-4. If something fails: `docker compose logs backend` and `docker compose logs postgres`.
+5. If something fails: `docker compose logs <service>`, for example `docker compose logs iam-service`.
 
 ### 3.2 Creating and Activating the First Account
 
-1. On the web, tap **Sign up** and complete the **Create your Account** form.
-2. New accounts stay **inactive** until the email is confirmed with a code. If you configured `EMAIL_USER` and `EMAIL_PASS`, the code arrives by email. Otherwise, activate the account manually:
+1. On the web, tap **Sign up** and complete the **Create your Account** form. Accept the terms.
+2. New accounts stay **inactive** until the email is confirmed with a code. If you configured `EMAIL_USER` and `EMAIL_PASS`, the code arrives by email. If not, activate the account by hand from the root of the Backend:
+
+   ```bash
+   docker compose exec -T postgres-iam psql -U postgres -d iam -c "UPDATE users SET status='ACTIVE' WHERE email='<email_in_lowercase>'"
    ```
-   docker compose exec postgres psql -U <database_user> -d traduce_senas -c "UPDATE users SET status='ACTIVE' WHERE email='<email>'"
-   ```
-   (`<database_user>` is the PostgreSQL user defined in the compose file.)
+
+   Emails are stored in lowercase, so write it that way in the query.
+
+If sign-up says the code could not be sent, the account was still created: request a new code with **Resend** once the email is configured.
 
 ### 3.3 First Administrator
 
-It is done with an SQL statement, only once. It is explained step by step in the [Administrator manual](admin-manual-apa.md), section 3. In short, the `ADMIN` role is inserted for that email in the `user_roles` table.
+It is done with an SQL statement, only once: the `ADMIN` role is assigned to the email of the account. The step-by-step procedure is in the [Administrator manual](../../../docs/14-training/admin-manual.md), section 3.
 
 ### 3.4 Resetting the Database (Deletes All Data)
 
-> **This deletes ALL the data in the database** (accounts, history, templates). Make a backup first if you care about it:
-> `docker compose exec postgres pg_dump -U <database_user> traduce_senas > backup.sql`
+> **This deletes ALL the data in all the databases** (accounts, history, templates and samples). If it matters to you, make a backup first, for example with `docker compose exec -T postgres-iam pg_dump -U postgres iam > backup-iam.sql`, and repeat it for each database.
 
-```
+```bash
 docker compose down -v
-docker compose up -d
+docker compose up --build -d
 ```
+
+When the volumes are recreated, PostgreSQL runs the mounted SQL files again, so there is no need to apply migrations by hand.
 
 ## 4. Operation
 
@@ -278,10 +315,12 @@ docker compose up -d
 |--------------|---------|
 | Stop everything without deleting data | `docker compose stop` |
 | Start again | `docker compose up -d` |
+| See the status | `docker compose ps` |
 | Stop and remove containers (data is kept) | `docker compose down` |
-| See backend messages | `docker compose logs -f backend` |
+| See the messages of one service | `docker compose logs -f iam-service` |
+| Rebuild after changing code | `docker compose up --build -d` |
 | Also delete the data | `docker compose down -v` (**deletes the data**) |
-| Update the code | `git pull` in each repo (`repos/Backend`, `repos/Frontend`, `repos/Docs`), rebuild the images (section 2.3) and `docker compose up -d`. New migrations are not applied automatically to an existing database. |
+| Update the code | `git pull` in `backendTS` and in `frontendTS`, then `docker compose up --build -d`. New migrations are not applied automatically to a database that already exists: see section 1.2. |
 
 ## 5. Common Problems
 
@@ -291,26 +330,30 @@ docker compose up -d
 
 | Symptom | Likely cause | What to do |
 |---------|--------------|------------|
-| `./build-backend.sh` says the branch does not exist or that it "does not have the new Dockerfile committed" | You ran the script without `--dockerfile-from develop`: the `chore/docker-backend` branch does not exist or its Dockerfile is not committed | Run `./build-backend.sh --dockerfile-from develop` (section 2.3) or use section 2.4 |
-| `docker compose up` fails with the frontend "has no healthcheck" | The backend Dockerfile is the `develop` one, without `HEALTHCHECK` | Section 2.4, step 3 |
-| The frontend does not start (nginx: `host not found in upstream "backend"`) | Nginx needs the `backend` service to exist already | Start `backend` first; check `docker compose logs frontend` |
-| The build fails with unreadable-file errors | Cloud-synced folder | Use the `build-*.sh` scripts or move the project to a local folder |
-| Tables do not exist or roles/statistics are missing | Volume created with another branch, or a failed migration | Sections 1.2 and 3.4: reset the volume with the correct branch |
-| Database error after the database name changed | The old volume has another database | `docker compose down -v` (deletes data) |
-| The verification code does not arrive | `EMAIL_USER`/`EMAIL_PASS` not configured or rejected | Activate the account manually (3.2) or configure email |
-| All users lose their session after a restart | `JWT_SECRET` changed or is empty | Set a fixed `JWT_SECRET` in `repos/Backend/.env` |
-| Port 8080, 3000 or 5433 is in use | Another program is using it | Close that program or change the port in the compose file |
-| The camera does not work on the web | The browser does not have permission | Accept the permission. Some browsers only allow the camera on `localhost`/`127.0.0.1` or over HTTPS |
-| `npm run dev` fails with "EADDRINUSE" | Port 3000 is taken by the container | `docker compose stop backend` |
+| `docker compose up` fails with "Define JWT_SECRET", "POSTGRES_PASSWORD", "MONGO_ROOT_PASSWORD" or "RABBITMQ_PASSWORD" | That variable is missing in `.env` | Copy `.env.example` to `.env` at the root of the Backend and fill it in |
+| The services do not start and `iam` keeps restarting | `JWT_SECRET` has fewer than 32 characters | Use a secret of 32 characters or more |
+| `/health` shows `degraded` or `down` permanently | A database does not respond, RabbitMQ is not ready, or a password with special characters breaks the URL | Check `docker compose logs <service>`. Remove `@ : / ? #` from the passwords and recreate the volumes if a password changed |
+| I changed a `.sql` file and nothing happened | PostgreSQL only runs the SQL files when the volume is created | Apply the migration by hand (section 1.2) or use `docker compose down -v` (deletes data) |
+| The verification code does not arrive | `EMAIL_USER` or `EMAIL_PASS` are empty or rejected | Activate the account by hand (section 3.2) or configure a Gmail app password and restart `iam-service` |
+| The browser blocks the calls (CORS) | The origin of your web app is not in `CORS_ORIGINS` | Add it to `CORS_ORIGINS` and restart the gateway with `docker compose up -d api-gateway` |
+| The app does not connect to your backend | It points to the public API by default | Set `EXPO_PUBLIC_API_URL` in the frontend `.env` and restart Expo |
+| Google or Facebook sign-in shows a not-configured notice | `GOOGLE_CLIENT_IDS` or `FACEBOOK_APP_ID` is missing in the backend, or the platform credential is missing in the frontend | Configure the identifiers on both sides |
+| Port 8080 or 5433 to 5437 is in use | Another program or the Docker stack uses it | Close the other program or stop the container (`docker compose stop api-gateway`) |
+| `npm run dev:all` cannot connect to the database | The Docker PostgreSQL servers are not running | Run `docker compose up -d postgres-iam postgres-recognition postgres-lexicon postgres-analytics postgres-profile` |
+| Expo does not start or hangs | Corrupted cache | Run `npx expo start -c` |
+| All users lose their session after a restart | `JWT_SECRET` changed | Use a fixed `JWT_SECRET` in `.env` |
+| The camera does not work on the web | The browser has no permission or the origin is not secure | Accept the permission. Some browsers only allow the camera on `localhost` or over HTTPS |
 
 ## References
 
-Docker Inc. (n.d.). *Docker Compose*. Docker Docs. Retrieved October 7, 2026, from https://docs.docker.com/compose/
+Caddy Project. (n.d.). *Caddy documentation*. Retrieved November 4, 2026, from https://caddyserver.com/docs/
 
-Expo. (n.d.). *Expo documentation*. Retrieved October 7, 2026, from https://docs.expo.dev/
+Docker Inc. (n.d.). *Docker Compose*. Docker Docs. Retrieved November 4, 2026, from https://docs.docker.com/compose/
 
-F5, Inc. (n.d.). *nginx documentation*. Retrieved October 7, 2026, from https://nginx.org/en/docs/
+Expo. (n.d.). *Expo documentation*. Retrieved November 4, 2026, from https://docs.expo.dev/
 
-OpenJS Foundation. (n.d.). *Node.js documentation*. Retrieved October 7, 2026, from https://nodejs.org/docs/latest/api/
+F5, Inc. (n.d.). *nginx documentation*. Retrieved November 4, 2026, from https://nginx.org/en/docs/
 
-The PostgreSQL Global Development Group. (n.d.). *PostgreSQL 16 documentation*. Retrieved October 7, 2026, from https://www.postgresql.org/docs/16/
+OpenJS Foundation. (n.d.). *Node.js documentation*. Retrieved November 4, 2026, from https://nodejs.org/docs/latest/api/
+
+The PostgreSQL Global Development Group. (n.d.). *PostgreSQL 16 documentation*. Retrieved November 4, 2026, from https://www.postgresql.org/docs/16/

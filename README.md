@@ -3,9 +3,9 @@
 Entregables del proyecto **Traduce Señas** (traductor de Lengua de Señas Colombiana a texto).
 SENA – Análisis y Desarrollo de Software, ficha 3145556.
 
-**Integrantes:** Luis Alejandro Duarte Aldana, Juan Mauricio Suaza Solorzano, Juan Camilo Fierro Esquivel.
+**Integrantes:** Luis Alejandro Duarte Aldana, Juan Mauricio Suaza Solórzano, Juan Camilo Fierro Esquivel.
 
-Cada carpeta tiene la versión en español (`ES`) y en inglés (`EN`), y cada una en Word, PDF y Markdown.
+Cada carpeta tiene la versión en español (`ES`) y en inglés (`EN`), y cada una en Word, PDF y Markdown. La excepción es la carpeta 11: solo tiene la versión en español, en Markdown y PDF.
 
 | N.º | Evidencia | Carpeta |
 |---:|---|---|
@@ -19,9 +19,11 @@ Cada carpeta tiene la versión en español (`ES`) y en inglés (`EN`), y cada un
 | 08 | Acciones correctivas, preventivas y de mejoramiento | [08_ACCIONES_CORRECTIVAS_PREVENTIVAS_Y_DE_MEJORAMIENTO](08_ACCIONES_CORRECTIVAS_PREVENTIVAS_Y_DE_MEJORAMIENTO) |
 | 09 | Manuales técnico, de instalación y de usuario | [MANUALES](MANUALES) |
 | 10 | Artículo del proyecto (IEEE) | [10_ARTICULO_DEL_PROYECTO](10_ARTICULO_DEL_PROYECTO) |
-| 11 | Enlaces de evidencias | [11_ENLACES_DE_EVIDENCIAS](11_ENLACES_DE_EVIDENCIAS) |
+| 11 | Enlaces de evidencias (solo ES, en Markdown y PDF) | [11_ENLACES_DE_EVIDENCIAS](11_ENLACES_DE_EVIDENCIAS) |
 
 ## Repositorios del software
 
-- Backend: https://github.com/mauro-1508/backendTS (rama `develop`)
-- Frontend: https://github.com/tadeo77789/frontendTS (rama `develop`)
+La rama `main` es la vigente en ambos repositorios.
+
+- Backend: https://github.com/mauro-1508/backendTS (rama `main`, versión 1.4.0)
+- Frontend: https://github.com/tadeo77789/frontendTS (rama `main`, versión 1.3.1)

@@ -160,7 +160,7 @@ La interfaz es inclusiva, intuitiva y accesible: botones grandes (mínimo 48 × 
 
 ### Interfaces de software
 
-- Android 9 (API 28) o superior.
+- Android 7.0 (API 24) o superior.
 
 - iOS 14 o superior.
 
@@ -200,7 +200,7 @@ La Tabla 4 resume los once requisitos funcionales del sistema y sus especificaci
 | RF10 | Manejo de errores | ERF10.1 Clasificación y consulta de errores | Media |
 | RF11 | Política de contraseñas | ERF11.1 Configuración de la política | Media |
 
-*Nota.* El estado de RF8 a RF11 queda pendiente de decisión del equipo.
+*Nota.* RF8 (gamificación) está implementado, con retos diarios y medallas según ADR-009 y ADR-010. RF9 y RF10 aún no están implementados. RF11 solo cuenta con validación de contraseñas con reglas fijas (FR-906); la política configurable no existe.
 
 ### Módulo de identidad (iam-service)
 
@@ -210,7 +210,7 @@ La Tabla 4 resume los once requisitos funcionales del sistema y sus especificaci
 
 | **ID** | **Descripción** | **Origen** | **Prioridad** |
 |---|---|---|---|
-| FR-001 | Registrar usuario con nombre, correo, contraseña válida y aceptación de los términos con fecha y versión; la cuenta nace INACTIVE hasta verificar el correo | RF1 | Debe |
+| FR-001 | Registrar usuario con nombre, correo, contraseña válida y aceptación de los términos con fecha y versión, sin fecha de nacimiento ni nombre de usuario; la cuenta nace INACTIVE hasta verificar el correo | RF1 | Debe |
 | FR-002 | Rechazar el registro sin aceptar los términos y guardar fecha y versión aceptada | RF1 | Debe |
 | FR-003 | Verificar el correo con un código de 6 dígitos | RF1 | Debe |
 | FR-004 | Guardar los códigos solo como hash, con vencimiento, un solo uso y contador de intentos | RF1 | Debe |
@@ -218,11 +218,11 @@ La Tabla 4 resume los once requisitos funcionales del sistema y sus especificaci
 | FR-006 | Bloquear temporalmente tras intentos fallidos (1, 5 y 10 minutos) | RF1 | Debe |
 | FR-008 | Registro e inicio de sesión con Google y Facebook | RF1 | Debe |
 | FR-010 | Recuperar la contraseña con un código de un solo uso que vence | RF1 | Debe |
-| FR-012 | Rotar los tokens de refresco y detectar su reutilización | RF1 | Debe |
-| FR-014 | Eliminar la cuenta anonimizando los datos (Ley 1581 de 2012) | RF1, RF5 | Debería |
+| FR-012 | Retirado. Antes: rotar los tokens de refresco. No existe token de refresco: la sesión es un JWT que dura un día | RF1 | — |
+| FR-014 | Eliminar la cuenta con confirmación por código enviado al correo: se borra la fila del usuario y el evento iam.UserDeleted hace que los demás servicios borren o desvinculen sus copias (Ley 1581 de 2012) | RF1, RF5 | Debería |
 | FR-015 | El administrador lista, bloquea, restaura y desactiva cuentas | RF1, RF6 | Debería |
 
-*Nota.* Prioridad MoSCoW (Debe, Debería, Podría). El catálogo completo tiene 79 requisitos (04-requirements/functional.md); en estas tablas se muestran los representativos de cada módulo.
+*Nota.* Prioridad MoSCoW (Debe, Debería, Podría). El catálogo completo tiene 88 requisitos funcionales, 85 activos y 3 retirados (04-requirements/functional.md); en estas tablas se muestran los representativos de cada módulo.
 
 ### Módulo de autorización (iam-service)
 
@@ -251,8 +251,10 @@ La Tabla 4 resume los once requisitos funcionales del sistema y sus especificaci
 | FR-204 | Elegir el idioma de la interfaz (español, inglés, francés y portugués) | RF5 | Debería |
 | FR-205 | Activar o desactivar todas las notificaciones con un interruptor | RF4, RF5 | Debe |
 | FR-502 | Entregar notificaciones solo por canales visuales: en la app y por correo (sin push, ADR-007) | RF4 | Debe |
+| FR-503 | Retirado (ADR-007). Antes: registrar dispositivos para notificaciones push. La push se sustituye por correo y no existe tabla de dispositivos | RF4 | — |
 | FR-507 | Marcar una notificación como leída | RF4 | Debe |
-| FR-510 | Enviar a los administradores con notificaciones activas un reporte semanal y otro mensual por correo, con enlace al panel de administración | RF4, RF6 | Podría |
+| FR-509 | Retirado (ADR-007). Antes: toda notificación push debía tener un dispositivo destino. No se crea ninguna notificación push | RF4 | — |
+| FR-510 | Enviar a los administradores con notificaciones activas el reporte semanal y el mensual de uso, y el recordatorio semanal del modelo (MODEL_REMINDER), como aviso en la app y por correo, con un botón al panel de administración | RF4, RF6 | Debería |
 
 ### Módulo de léxico (lexicon-service)
 
@@ -286,6 +288,7 @@ La Tabla 4 resume los once requisitos funcionales del sistema y sus especificaci
 | FR-407 | Borrar entradas del historial (borrado lógico) | RF5 | Debería |
 | FR-409 | Mostrar el historial agrupado por sesiones, con una tarjeta por sesión | RF3, RF5 | Debería |
 | FR-410 | Eliminar las traducciones del historial a los 30 días de creadas | RF5 | Debería |
+| FR-411 | El administrador agrega palabras sin reentrenar el modelo: se guardan como plantilla de tipo word (30 cuadros de 128 valores) y, en el dispositivo, se comparan con DTW antes que el modelo (ADR-011) | RF3 | Debería |
 | FR-601 | Capturar muestras de gestos agrupadas por sesión de captura | RF3 | Debe |
 | FR-602 | No guardar ninguna muestra sin consentimiento demostrable | — | Debe |
 | FR-605 | Mantener un registro de modelos con sus métricas de entrenamiento | RF3 | Debe |
@@ -320,18 +323,16 @@ La Tabla 4 resume los once requisitos funcionales del sistema y sus especificaci
 
 | **Código** | **Atributo** | **Requisito y métrica** |
 |---|---|---|
-| RNF1 | Rendimiento | Respuesta de extremo a extremo de 5 s o menos; latencia P95 < 300 ms en los servicios críticos (login, traducciones, léxico) con 50 peticiones por segundo; ≥ 15 cuadros por segundo durante la captura |
-| RNF2 | Usabilidad | Interfaz sencilla; un usuario nuevo completa una traducción sin ayuda en menos de 2 minutos |
-| RNF3 | Compatibilidad | Android 9+, iOS 14+ y navegadores de escritorio actualizados |
-| RNF4 | Seguridad | Contraseñas con bcrypt; JWT obligatorio con secreto de 32+ caracteres; bloqueo progresivo; límite de peticiones en /api/auth; HTTPS en producción |
-| RNF5 | Adaptabilidad / escalabilidad | 500 usuarios concurrentes y 5 000 registrados; cada microservicio escala por separado |
-| RNF6 | Documentación | Manuales técnico, de instalación y de usuario; contratos OpenAPI de cada servicio |
-| RNF7 | Tolerancia a fallos | Un fallo de un servicio no detiene a los demás; el bus de eventos se reconecta solo |
-| RNF8 | Protección de datos personales | Autorización expresa con fecha y versión; derecho de supresión; muestras desvinculadas de la identidad |
-| RNF9 | Accesibilidad | WCAG 2.1 nivel AA como meta; ninguna información solo por sonido; contraste 4,5:1; objetivos táctiles de 48 dp |
-| RNF10 | Observabilidad | Endpoint GET /health en cada servicio; registros estructurados y errores clasificados |
-| RNF11 | Mantenibilidad | Arquitectura hexagonal; cobertura de pruebas unitarias ≥ 80 %; convenciones de commits y ramas |
-| RNF12 | Recuperación ante desastres | Copias de seguridad diarias de las bases de datos; restauración documentada en menos de 4 horas |
+| RNF1 | Accesibilidad | WCAG 2.1 nivel AA como meta; ninguna información solo por sonido; contraste de 4,5:1; objetivos táctiles de 48 dp; las notificaciones usan solo canales visuales |
+| RNF2 | Rendimiento | Latencia P95 menor de 300 ms en los servicios críticos con 50 peticiones por segundo; reconocimiento de cada seña en menos de 500 ms; ≥ 15 cuadros por segundo durante la captura; precisión del modelo ≥ 85 % antes de publicarlo |
+| RNF3 | Disponibilidad | SLO de producción de 99,5 %; sin conexión, el alfabeto y el historial se leen desde la caché y las notificaciones se difieren |
+| RNF4 | Escalabilidad | 500 usuarios concurrentes y 5 000 registrados; cada microservicio escala por separado; léxico de hasta 5 000 señas sin degradar la consulta |
+| RNF5 | Seguridad | Contraseñas con bcrypt (coste 10 hoy; objetivo 12); JWT obligatorio de un día, sin token de refresco; bloqueo progresivo; límite de 10 peticiones por minuto por IP en el inicio de sesión y la recuperación; HTTPS en producción |
+| RNF6 | Observabilidad | Endpoint GET /health en cada servicio y GET /health/ready para la disponibilidad; registros estructurados con identificador de correlación y errores clasificados |
+| RNF7 | Mantenibilidad | Cobertura de pruebas ≥ 80 % de líneas (≥ 90 % en el dominio); complejidad ciclomática ≤ 10 por método; cambios de esquema solo mediante migraciones versionadas |
+| RNF8 | Portabilidad | Backend desplegado como imagen Docker; PostgreSQL 15 o superior y MongoDB 6 o superior; configuración solo por variables de entorno; app móvil desde Android 8.0 (API 26) e iOS 14 |
+| RNF9 | Usabilidad | Primera traducción en menos de 3 minutos desde que se abre la app (prueba con 5 usuarios); registro en 4 pantallas o menos; mensajes de error en lenguaje claro |
+| RNF10 | Recuperación ante desastres | Copias diarias de PostgreSQL y MongoDB como objetivo (hoy, volcados manuales), con retención de 30 días; RTO menor de 30 min y RPO menor de 24 h para PostgreSQL; simulacro de restauración trimestral |
 
 *Nota.* La accesibilidad se trata como restricción principal porque los usuarios primarios son personas sordas (World Wide Web Consortium [W3C], 2018).
 
@@ -429,7 +430,7 @@ La Tabla 4 resume los once requisitos funcionales del sistema y sus especificaci
 
 # Trazabilidad
 
-Cada requisito funcional está ligado a la historia de usuario que lo planifica y a las tablas que lo persisten. La matriz de trazabilidad completa se mantiene en el repositorio de documentación (04-requirements/traceability-matrix.md). La Tabla 18 resume el estado de implementación de los 79 requisitos detallados según esa matriz.
+Cada requisito funcional está ligado a la historia de usuario que lo planifica y a las tablas que lo persisten. La matriz de trazabilidad completa se mantiene en el repositorio de documentación (04-requirements/traceability-matrix.md). La Tabla 18 resume el estado de implementación de los 85 requisitos detallados activos según esa matriz.
 
 **Tabla 18**
 
@@ -437,15 +438,15 @@ Cada requisito funcional está ligado a la historia de usuario que lo planifica 
 
 | **Estado** | **Requisitos detallados** |
 |---|---|
-| Cubiertos | 47 |
+| Cubiertos | 57 |
 | Parciales | 10 |
-| Sin implementar | 20 |
+| Sin implementar | 16 |
 | Sin verificar | 2 |
-| **Total** | **79** |
+| **Total** | **85** |
 
 # Conclusiones
 
-La especificación deja definidos once requisitos funcionales, desglosados en 79 requisitos detallados, y doce requisitos no funcionales. De los 79 requisitos detallados, 47 están cubiertos, 10 de forma parcial, 20 sin implementar y 2 sin verificar. La accesibilidad y la protección de datos personales se establecen como restricciones principales por la naturaleza de los usuarios y de la información biométrica que maneja el sistema.
+La especificación deja definidos once requisitos funcionales, desglosados en 88 requisitos detallados (85 activos y 3 retirados), y diez requisitos no funcionales. De los 85 activos, 57 están cubiertos, 10 de forma parcial, 16 sin implementar y 2 sin verificar. La accesibilidad y la protección de datos personales se establecen como restricciones principales por la naturaleza de los usuarios y de la información biométrica que maneja el sistema.
 
 Este documento es la línea base para el análisis, el diseño y las pruebas; cualquier cambio de alcance debe registrarse aquí y en la matriz de trazabilidad antes de implementarse.
 

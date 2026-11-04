@@ -32,7 +32,7 @@ To describe the dynamic behavior of the system's critical processes so that the 
 
 The analysis covers the processes with the greatest value and risk: login, registration with email verification, password recovery, live sign translation, and capture of training samples. Simple query processes (view alphabet, view history, view statistics) follow the same request-response pattern and are summarized in tables.
 
-One process added after these diagrams is the daily challenge: when a translation is saved, profile-service receives the TranslationProduced event, adds one to the user's challenge of the day and, on reaching the target, stores the points and creates the challenge-completed notice. Accumulated points unlock medals. The history groups translations by session, and translations are deleted after 30 days.
+One process added after these diagrams is the daily challenge: when a translation is saved, profile-service receives the TranslationProduced event, adds one to the user's challenge of the day (ADR-009) and, on reaching the target, stores the points and creates the challenge-completed notice. Accumulated points unlock medals (ADR-010). The history groups translations by session, and translations are deleted after 30 days.
 
 # Context of the analysis
 
@@ -122,7 +122,7 @@ The response to the request is generic so as not to reveal whether an email exis
 
 ## Translating signs live
 
-Recognition runs on the device: MediaPipe obtains the 21 hand points in each frame, the application normalizes them (centers them on the wrist and scales them by the size of the palm), and compares them with the templates using Dynamic Time Warping (Sakoe and Chiba, 1978). If the distance exceeds the threshold, the application does not guess: it displays a visual warning. Only the final result is sent to the backend to be saved in the history, which reduces latency and protects privacy because the video never leaves the device.
+Recognition runs on the device: MediaPipe obtains the 21 hand points in each frame, the application normalizes them (centers them on the wrist and scales them by the size of the palm), and compares them with the templates using Dynamic Time Warping (Sakoe and Chiba, 1978). Words added by the administrator are compared first as word-type templates, and the model decides only if none of them matches (ADR-011). If the distance exceeds the threshold, the application does not guess: it displays a visual warning. Only the final result is sent to the backend to be saved in the history, which reduces latency and protects privacy because the video never leaves the device.
 
 **Figure 5**
 
@@ -172,7 +172,7 @@ Activity diagrams describe the workflow of a process, including its decisions an
 
 ## User account states
 
-The user account is the object with the most important lifecycle for security. A temporary lock is a date that lifts itself; when the lock scale is exhausted, the account moves to BLOCKED, and only an administrator can restore it. Deletion anonymizes the data instead of physically erasing it, to preserve audit integrity and comply with the right to erasure.
+The user account is the object with the most important lifecycle for security. A temporary lock is a date that lifts itself; when the lock scale is exhausted, the account moves to BLOCKED, and only an administrator can restore it. Deletion is a real deletion: the user row is removed together with its codes, and the iam.UserDeleted event makes the other services erase or unlink their data, to fulfil the right to erasure.
 
 **Figure 9**
 
@@ -193,7 +193,7 @@ The user account is the object with the most important lifecycle for security. A
 | INACTIVE | Valid verification code | ACTIVE | Single-use and valid code (FR-004) |
 | ACTIVE | Repeated failed attempts | Temporary lock | Waits of 1, 5, and 10 minutes (FR-006) |
 | Temporary lock | Lock scale exhausted | BLOCKED | Only an administrator restores (FR-007) |
-| ACTIVE | The user deletes their account | Deleted | The row is anonymized (FR-014) |
+| ACTIVE | The user confirms deletion with a code | Deleted | The row and its codes are deleted; iam.UserDeleted is published (FR-014) |
 
 ## States of a translation session
 
@@ -224,7 +224,7 @@ The communication diagram shows how the objects collaborate to complete a task, 
 | **Event** | **Publisher** | **Consumers** | **Effect** |
 |---|---|---|---|
 | iam.UserRegistered | iam-service | profile, analytics | Creates profile and preferences; counts the registration |
-| iam.AccountDeletionRequested | iam-service | recognition, profile | Anonymizes history and profile data |
+| iam.UserDeleted | iam-service | recognition, profile, analytics | Deletes translations and the profile; unlinks samples and usage events |
 | recognition.TranslationProduced | recognition-service | profile, analytics | Advances achievements; records usage |
 | lexicon.SignPublished | lexicon-service | recognition, analytics | Updates the catalog of recognizable signs |
 | lexicon.SignWithdrawn | lexicon-service | recognition | Removes the sign from recognition |

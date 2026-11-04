@@ -56,11 +56,11 @@ Se aplica la pirámide de pruebas: muchas pruebas unitarias rápidas en la base,
 
 ## Elementos a probar
 
-- api-gateway y los cinco microservicios (rama develop, commit 2993301).
+- api-gateway y los cinco microservicios (backend versión 1.4.0, rama main, commit a962982).
 
 - Paquete compartido @traduce/shared.
 
-- Aplicación cliente en Android y en navegador de escritorio, con pruebas unitarias de su lógica: validaciones, cliente de la API, flujos de autenticación y reconocimiento (rama chore/frontend-unit-tests).
+- Aplicación cliente en Android y en navegador de escritorio, con pruebas unitarias de su lógica: validaciones, cliente de la API, flujos de autenticación y reconocimiento (frontend versión 1.3.1, rama main, commit a5e231d).
 
 ## Elementos fuera de alcance de esta iteración
 
@@ -105,7 +105,7 @@ Se aplica la pirámide de pruebas: muchas pruebas unitarias rápidas en la base,
 
 # Resultados de las pruebas automatizadas
 
-Las suites automatizadas se ejecutaron con «npm test» en cada repositorio. En el backend, el comando compila el paquete compartido y corre las pruebas de todos los servicios con el ejecutor nativo de Node.js; en el frontend, corre Jest con el preset de Expo (jest-expo). El resultado fue el siguiente:
+Las suites automatizadas se ejecutaron con «npm test» en cada repositorio. En el backend, el comando compila el paquete compartido y corre las pruebas de todos los servicios con el ejecutor nativo de Node.js; en el frontend, corre Jest con el preset de Expo (jest-expo). El resultado vigente, de la ejecución del 4 de noviembre de 2026, es: en el backend, 918 pruebas aprobadas, 0 fallidas y 13 omitidas por requerir PostgreSQL en el equipo local; en el frontend, 469 pruebas en 46 suites, todas aprobadas. La primera corrida del frontend tuvo un timeout de 5 s en AchievementUnlockAlerts.test.tsx con la máquina cargada; pasó al ampliar el tiempo de espera a 30 s («--testTimeout=30000»). La tabla 4 conserva la ejecución del 16 de octubre de 2026 como referencia histórica:
 
 **Tabla 4**
 
@@ -120,7 +120,7 @@ Las suites automatizadas se ejecutaron con «npm test» en cada repositorio. En 
 | Omitidas / canceladas | 2 / 0 | 0 / 0 |
 | Duración total | 22 segundos | 3 segundos |
 
-*Nota.* Backend: rama develop, commit 2993301; las 2 pruebas omitidas necesitan una base PostgreSQL de prueba (variable PROFILE_TEST_DATABASE_URL). Frontend: rama chore/frontend-unit-tests, commit 6219c0d.
+*Nota.* Ejecución del 16 de octubre de 2026. Backend: rama develop, commit 2993301; las 2 pruebas omitidas necesitan una base PostgreSQL de prueba (variable PROFILE_TEST_DATABASE_URL). Frontend: rama chore/frontend-unit-tests, commit 6219c0d.
 
 **Tabla 5**
 
@@ -128,18 +128,18 @@ Las suites automatizadas se ejecutaron con «npm test» en cada repositorio. En 
 
 | **Componente** | **Archivos de prueba** | **Aspectos verificados** | **Cobertura de líneas** |
 |---|---|---|---|
-| @traduce/shared | 5 | Proveedor JWT, authMiddleware, requireRole, requirePermission, manejador de errores, configuración, validadores de eventos, reintento exponencial, bus en memoria y RabbitMQ | 99,5 % |
-| api-gateway | 1 | Enrutamiento por prefijo, CORS con lista blanca, configuración, rutas públicas, límite de peticiones | 100 % |
-| iam-service | 30 | Registro con verificación de correo, inicio de sesión según estado y con Google o Facebook, recuperación de contraseña, JWT con roles y permisos, cambio y borrado de cuenta (también con código por correo), envío de eventos con outbox, plantillas de correo | 89,3 % |
-| recognition-service | 13 | Traducciones, historial, plantillas de señas (solo ADMIN), muestras, consumo de eventos de lexicon con contrato y rechazo de escrituras de cuentas eliminadas | 86,0 % |
+| @traduce/shared | 7 | Proveedor JWT, authMiddleware, requireRole, requirePermission, manejador de errores, configuración, validadores de eventos, reintento exponencial, bus en memoria y RabbitMQ | 99,5 % |
+| api-gateway | 3 | Enrutamiento por prefijo, CORS con lista blanca, configuración, rutas públicas, límite de peticiones | 100 % |
+| iam-service | 33 | Registro con verificación de correo, inicio de sesión según estado y con Google o Facebook, recuperación de contraseña, JWT con roles y permisos, cambio y borrado de cuenta (también con código por correo), envío de eventos con outbox, plantillas de correo | 89,3 % |
+| recognition-service | 17 | Traducciones, historial, plantillas de señas (solo ADMIN), muestras, consumo de eventos de lexicon con contrato y rechazo de escrituras de cuentas eliminadas | 86,0 % |
 | lexicon-service | 5 | Catálogo, alfabeto, búsqueda, categorías, publicación y retiro de señas | 83,5 % |
 | analytics-service | 6 | Registro de eventos, reportes, manejadores de eventos y borrado atómico de los datos de una cuenta | 95,1 % |
-| profile-service | 11 | Perfil, preferencias con permisos y creación del perfil faltante, notificaciones, logros con actualizaciones simultáneas, borrado de cuenta y recuperación de perfiles | 83,5 % |
-| Frontend (aplicación cliente) | 8 | Validación de correo y contraseña, cliente de la API (errores, token enviado solo a la API, aviso único de sesión caducada), flujos de confirmar correo y recuperar contraseña, contador de reenvío, normalización de la mano y clasificador KNN | 4,5 % |
+| profile-service | 27 | Perfil, preferencias con permisos y creación del perfil faltante, notificaciones, logros con actualizaciones simultáneas, borrado de cuenta y recuperación de perfiles | 83,5 % |
+| Frontend (aplicación cliente) | 46 Jest (más 3 E2E con Playwright) | Validación de correo y contraseña, cliente de la API (errores, token enviado solo a la API, aviso único de sesión caducada), flujos de confirmar correo y recuperar contraseña, contador de reenvío, normalización de la mano y clasificador KNN | 4,5 % |
 
-*Nota.* Cobertura de líneas medida el 16 de octubre de 2026 con la cobertura integrada de node:test en el backend (total 88,5 %) y con «jest --coverage» en el frontend. Esa corrida es anterior a las pruebas descritas abajo, por lo que las cifras de las tablas 4 y 5 no las incluyen.
+*Nota.* Las cifras de cobertura de líneas se midieron el 16 de octubre de 2026 con la cobertura integrada de node:test en el backend (total 88,5 %) y con «jest --coverage» en el frontend; esa corrida es anterior a las pruebas descritas abajo y no se ha repetido. La columna de archivos de prueba es del 4 de noviembre de 2026 y cuenta los archivos de cada componente en la rama main.
 
-**Pruebas añadidas después de esa corrida.** En el frontend (versión 1.2.0) se agregaron pruebas de Jest para los servicios, los formularios de autenticación, los clasificadores de visión y los almacenes de plantillas, y una suite extremo a extremo con Playwright (carpeta e2e/: auth, alphabet e history). Esa suite se ejecuta con «npm run e2e» sobre la web exportada, contra el backend levantado con Docker Compose, con un solo worker (el gateway limita los inicios de sesión por minuto), ancho de celular y cámara falsa del navegador; en CI corre contra el backend en compose. En el backend (profile-service) se agregaron pruebas de retos diarios (dominio, casos de uso, API y PostgreSQL real), de las medallas por puntos de reto y del envío de correos a los administradores.
+**Pruebas añadidas después de esa corrida.** En el frontend (versión vigente 1.3.1) se agregaron pruebas de Jest para los servicios, los formularios de autenticación, los clasificadores de visión y los almacenes de plantillas, y una suite extremo a extremo con Playwright (carpeta e2e/: auth, alphabet e history). Esa suite se ejecuta con «npm run e2e» sobre la web exportada, contra el backend levantado con Docker Compose, con un solo worker (el gateway limita los inicios de sesión por minuto), ancho de celular y cámara falsa del navegador; en CI corre contra el backend en compose. En el backend (profile-service) se agregaron pruebas de retos diarios (dominio, casos de uso, API y PostgreSQL real), de las medallas por puntos de reto y del envío de correos a los administradores.
 
 # Casos de prueba funcionales
 
@@ -164,13 +164,13 @@ Los casos siguientes verifican los requisitos críticos. El estado «Aprobado» 
 | CP-11 | FR-405 | Seña no reconocida | Gesto fuera del vocabulario | Aviso visual; no se muestra palabra | Pendiente (prueba manual en dispositivo) |
 | CP-12 | FR-304, FR-310 | Consulta del alfabeto | GET /api/lexicon/alphabet | Solo letras de la LSC en estado ACTIVE | Aprobado (automatizada) |
 | CP-13 | FR-406 | Historial privado | Usuario A consulta historial de B | Solo ve sus propias traducciones | Pendiente (prueba manual) |
-| CP-14 | FR-806, FR-807 | Reto diario completado | Usuario que guarda tantas traducciones como la meta del día | Progreso hasta la meta; recompensa guardada una sola vez; aviso CHALLENGE_COMPLETED | Pendiente (hay pruebas automatizadas en profile-service; sin resultado en este informe) |
-| CP-15 | FR-808 | Medalla por puntos de reto | Usuario que acumula puntos de reto | GET /api/profile/challenges/rewards/summary devuelve el total; la medalla se otorga una vez | Pendiente (ídem) |
-| CP-16 | FR-409, FR-707 | Historial por sesiones y URL propia | Abrir el historial por su URL con varias traducciones guardadas | Una tarjeta por sesión; la pantalla se recarga sin perder la ruta | Pendiente (la suite Playwright cubre el historial; falta registrar resultado) |
+| CP-14 | FR-806, FR-807 | Reto diario completado | Usuario que guarda tantas traducciones como la meta del día | Progreso hasta la meta; recompensa guardada una sola vez; aviso CHALLENGE_COMPLETED | Aprobado (automatizada, ejecución del 4 de noviembre de 2026) |
+| CP-15 | FR-808 | Medalla por puntos de reto | Usuario que acumula puntos de reto | GET /api/profile/challenges/rewards/summary devuelve el total; la medalla se otorga una vez | Aprobado (automatizada, ejecución del 4 de noviembre de 2026) |
+| CP-16 | FR-409, FR-707 | Historial por sesiones y URL propia | Abrir el historial por su URL con varias traducciones guardadas | Una tarjeta por sesión; la pantalla se recarga sin perder la ruta | Pendiente (el E2E de historial cubre guardar y borrar una traducción, pero no las sesiones ni la URL propia) |
 | CP-17 | FR-410 | Retención de 30 días | Traducción con más de 30 días | La traducción deja de aparecer en el historial | Pendiente (prueba manual) |
-| CP-14 | FR-014 | Eliminar cuenta | Usuario autenticado | Datos borrados en una transacción y eventos de uso anonimizados | Aprobado (automatizada) |
-| CP-16 | FR-602 | Muestra sin consentimiento | Muestra sin campo de consentimiento | 400; la muestra no se guarda | Aprobado (automatizada) |
-| CP-15 | FR-706 | Estadísticas con rol USER | Token sin permiso | 403 Prohibido | Aprobado (automatizada) |
+| CP-18 | FR-014 | Eliminar cuenta | Usuario autenticado | Datos borrados en una transacción y eventos de uso anonimizados | Aprobado (automatizada) |
+| CP-19 | FR-602 | Muestra sin consentimiento | Muestra sin campo de consentimiento | 400; la muestra no se guarda | Aprobado (automatizada) |
+| CP-20 | FR-706 | Estadísticas con rol USER | Token sin permiso | 403 Prohibido | Aprobado (automatizada) |
 
 *Nota.* La prueba de extremo a extremo con Docker (registro → inicio de sesión → traducción → logro y evento de uso) se ejecutó el 5 de octubre de 2026.
 
@@ -217,7 +217,7 @@ Para las 20 palabras nuevas se usa el conjunto público LSC-54 (Mora-Zarate et a
 
 # Conclusiones
 
-El backend supera la totalidad de su suite automatizada (683 pruebas: 681 aprobadas, 0 fallas y 2 omitidas por necesitar una base de datos de prueba) con 88,5 % de cobertura de líneas, por encima de la meta de 80 %. El frontend cuenta con sus primeras 79 pruebas unitarias, todas aprobadas, aunque su cobertura todavía es baja (4,5 %). Los flujos críticos de extremo a extremo funcionan con todos los servicios desplegados en Docker. Quedan pendientes la integración continua que ejecute las pruebas en cada cambio, ampliar las pruebas del frontend a las pantallas, las pruebas de rendimiento con k6, las pruebas con lector de pantalla, la medición de precisión del reconocimiento de las nuevas palabras y la prueba piloto con usuarios reales, que se programan para la siguiente iteración.
+El backend pasa su suite automatizada: 918 pruebas aprobadas y ninguna fallida; 13 se omiten en el equipo local porque necesitan una base PostgreSQL. El frontend pasa sus 469 pruebas Jest (46 suites), y sus 3 pruebas de extremo a extremo con Playwright corren en CI. La cobertura de líneas se midió por última vez el 16 de octubre de 2026: 88,5 % en el backend, por encima de la meta de 80 %, y 4,5 % en el frontend, que todavía es baja. Jest no tiene un umbral de cobertura configurado, aunque el ADR-006 fija una puerta de 80 %. La integración continua ya corre en ambos repositorios. Los flujos críticos de extremo a extremo funcionan con todos los servicios desplegados en Docker. Quedan pendientes ampliar las pruebas del frontend a las pantallas, las pruebas de rendimiento con k6, las pruebas con lector de pantalla, la medición de precisión del reconocimiento de las nuevas palabras y la prueba piloto con usuarios reales, que se programan para la siguiente iteración.
 
 # Referencias
 

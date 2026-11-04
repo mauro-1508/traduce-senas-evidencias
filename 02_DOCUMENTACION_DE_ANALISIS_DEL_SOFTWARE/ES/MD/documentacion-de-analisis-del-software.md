@@ -32,7 +32,7 @@ Describir el comportamiento dinámico de los procesos críticos del sistema para
 
 El análisis cubre los procesos que más valor y riesgo tienen: inicio de sesión, registro con verificación de correo, recuperación de contraseña, traducción de señas en vivo y captura de muestras para entrenamiento. Los procesos de consulta simple (ver alfabeto, ver historial, ver estadísticas) siguen el mismo patrón petición-respuesta y se resumen en tablas.
 
-Un proceso posterior a estos diagramas es el reto diario: cuando se guarda una traducción, profile-service recibe el evento TranslationProduced, suma uno al reto del día del usuario y, al llegar a la meta, guarda los puntos y crea el aviso de reto completado. Los puntos acumulados desbloquean medallas. El historial agrupa las traducciones por sesión y las traducciones se borran a los 30 días.
+Un proceso posterior a estos diagramas es el reto diario: cuando se guarda una traducción, profile-service recibe el evento TranslationProduced, suma uno al reto del día del usuario (ADR-009) y, al llegar a la meta, guarda los puntos y crea el aviso de reto completado. Los puntos acumulados desbloquean medallas (ADR-010). El historial agrupa las traducciones por sesión y las traducciones se borran a los 30 días.
 
 # Contexto del análisis
 
@@ -122,7 +122,7 @@ La respuesta a la solicitud es genérica para no revelar si un correo existe. El
 
 ## Traducir señas en vivo
 
-El reconocimiento se ejecuta en el dispositivo: MediaPipe obtiene los 21 puntos de la mano en cada cuadro, la aplicación los normaliza (centra en la muñeca y escala por el tamaño de la palma) y los compara con las plantillas mediante Dynamic Time Warping (Sakoe y Chiba, 1978). Si la distancia supera el umbral, la aplicación no adivina: muestra un aviso visual. Solo el resultado final viaja al backend para guardarse en el historial, lo que reduce la latencia y protege la privacidad porque el video nunca sale del dispositivo.
+El reconocimiento se ejecuta en el dispositivo: MediaPipe obtiene los 21 puntos de la mano en cada cuadro, la aplicación los normaliza (centra en la muñeca y escala por el tamaño de la palma) y los compara con las plantillas mediante Dynamic Time Warping (Sakoe y Chiba, 1978). Las palabras que añade el administrador se comparan primero como plantillas de tipo palabra, y solo si ninguna coincide decide el modelo (ADR-011). Si la distancia supera el umbral, la aplicación no adivina: muestra un aviso visual. Solo el resultado final viaja al backend para guardarse en el historial, lo que reduce la latencia y protege la privacidad porque el video nunca sale del dispositivo.
 
 **Figura 5**
 
@@ -172,7 +172,7 @@ Los diagramas de actividades describen el flujo de trabajo de un proceso, con su
 
 ## Estados de la cuenta de usuario
 
-La cuenta de usuario es el objeto con el ciclo de vida más importante para la seguridad. El bloqueo temporal es una fecha que se levanta sola; al agotarse la escala de bloqueos la cuenta pasa a BLOCKED y solo un administrador puede restaurarla. La eliminación anonimiza los datos en lugar de borrarlos físicamente, para conservar la integridad de la auditoría y cumplir el derecho de supresión.
+La cuenta de usuario es el objeto con el ciclo de vida más importante para la seguridad. El bloqueo temporal es una fecha que se levanta sola; al agotarse la escala de bloqueos la cuenta pasa a BLOCKED y solo un administrador puede restaurarla. La eliminación es un borrado real: la fila del usuario se elimina junto con sus códigos, y el evento iam.UserDeleted hace que los demás servicios borren o desvinculen sus datos, para cumplir el derecho de supresión.
 
 **Figura 9**
 
@@ -193,7 +193,7 @@ La cuenta de usuario es el objeto con el ciclo de vida más importante para la s
 | INACTIVE | Código de verificación válido | ACTIVE | Código de un solo uso y vigente (FR-004) |
 | ACTIVE | Intentos fallidos repetidos | Bloqueo temporal | Esperas de 1, 5 y 10 minutos (FR-006) |
 | Bloqueo temporal | Se agota la escala | BLOCKED | Solo un administrador restaura (FR-007) |
-| ACTIVE | El usuario elimina su cuenta | Eliminada | Se anonimiza la fila (FR-014) |
+| ACTIVE | El usuario confirma la eliminación con un código | Eliminada | Se borra la fila y sus códigos; se publica iam.UserDeleted (FR-014) |
 
 ## Estados de una sesión de traducción
 
@@ -224,7 +224,7 @@ El diagrama de comunicación muestra cómo colaboran los objetos para completar 
 | **Evento** | **Publicador** | **Consumidores** | **Efecto** |
 |---|---|---|---|
 | iam.UserRegistered | iam-service | profile, analytics | Crea perfil y preferencias; cuenta el registro |
-| iam.AccountDeletionRequested | iam-service | recognition, profile | Anonimiza historial y datos de perfil |
+| iam.UserDeleted | iam-service | recognition, profile, analytics | Borra traducciones y perfil; desvincula muestras y eventos de uso |
 | recognition.TranslationProduced | recognition-service | profile, analytics | Avanza logros; registra uso |
 | lexicon.SignPublished | lexicon-service | recognition, analytics | Actualiza el catálogo de señas reconocibles |
 | lexicon.SignWithdrawn | lexicon-service | recognition | Retira la seña del reconocimiento |

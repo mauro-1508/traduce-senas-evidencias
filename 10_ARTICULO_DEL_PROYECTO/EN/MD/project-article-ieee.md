@@ -4,7 +4,7 @@ Luis Alejandro Duarte Aldana, Juan Mauricio Suaza Solórzano and Juan Camilo Fie
 
 *Software Analysis and Development Technologist Program, National Learning Service (SENA), Colombia*
 
-*Abstract*—In Colombia the Deaf community has very few Colombian Sign Language (LSC) interpreters, and many of its everyday errands and conversations depend on the goodwill of others. This paper presents Traduce Señas, a phone and browser application that recognizes signs through the camera and turns them into text and speech. Recognition runs on the device itself: hand landmarks are extracted, normalized and compared against templates with Dynamic Time Warping, and when the match is not good enough the application warns the user instead of guessing. The server side was organized into five hexagonal microservices coordinated through events. The automated suite finished with 494 passing tests and no failures, the main flow was verified end to end, and the four critical and high findings of the security audit were closed. In a preliminary signer-independent measurement on the LSC-54 dataset, seven signs reached 75 % accuracy with 2 % wrong words. The limits of the approach for signs that differ only in location or movement are discussed.
+*Abstract*—In Colombia the Deaf community has very few Colombian Sign Language (LSC) interpreters, and many of its everyday errands and conversations depend on the goodwill of others. This paper presents Traduce Señas, a phone and browser application that recognizes signs through the camera and turns them into text and speech. Recognition runs on the device itself: hand landmarks are extracted, normalized and compared against templates with Dynamic Time Warping, and when the match is not good enough the application warns the user instead of guessing. The server side was organized into five hexagonal microservices coordinated through events. The automated suite of the server finished with 918 passing tests and no failures, the main flow was verified end to end, and the four critical and high findings of the security audit were closed. In a preliminary signer-independent measurement on the LSC-54 dataset, seven signs reached 75 % accuracy with 2 % wrong words. The limits of the approach for signs that differ only in location or movement are discussed.
 
 Index Terms—Colombian sign language, computer vision, MediaPipe, Dynamic Time Warping, microservices, hexagonal architecture, accessibility
 
@@ -60,7 +60,7 @@ Newman [10] describes microservices as small services that can be deployed indep
 
 The work was managed with Scrum [12] in two-week sprints, fourteen in total between January and July 2026. The instructor acted as product owner and accepted each increment in the sprint review, and whatever came up in retrospectives was recorded as an improvement action. A story was considered done when the code had been reviewed, the tests passed, accessibility had been checked and the documentation was up to date.
 
-Requirements were specified following the IEEE 830 standard [13]. The eleven high-level functional requirements were broken down into 79 detailed requirements (62 mandatory, 12 desirable and 5 optional) and traced to user stories, the data model and test cases. Twelve non-functional requirements were also defined, each with an acceptance metric. Accessibility was treated as the first constraint, because the main users are Deaf people.
+Requirements were specified following the IEEE 830 standard [13]. 88 functional requirements (85 active and 3 withdrawn) and 55 user stories were specified, traced to the data model and test cases. Ten non-functional requirements were also defined, each with an acceptance metric. Accessibility was treated as the first constraint, because the main users are Deaf people.
 
 ## Design Decisions
 
@@ -168,7 +168,7 @@ The test pyramid was followed. At the base, fast unit tests on the domain and th
 
 ## Functional Cases
 
-Sixteen functional cases were designed on the critical requirements. They include sign-up with email verification, sign-in depending on the account status, password recovery with an expired code, rate limiting, role control over templates, history privacy, account deletion and rejection of samples without consent.
+Twenty functional cases were designed on the critical requirements. They include sign-up with email verification, sign-in depending on the account status, password recovery with an expired code, rate limiting, role control over templates, history privacy, account deletion and rejection of samples without consent.
 
 ## Code and Security Audit
 
@@ -182,23 +182,23 @@ Recognition accuracy cannot be validated with unit tests, so a signer-independen
 
 ## Automated Tests
 
-The run of October 7, 2026 finished with 494 passing tests, none failed or skipped, spread over 115 suites and taking 87 seconds. Table II shows how they are distributed by component.
+The run of November 4, 2026 finished with 918 passing tests and none failed; 13 more were skipped on the local machine because they require a PostgreSQL database. The run of October 7 had finished with 494. Table II shows how the server tests are distributed by component, and the client adds 469 Jest tests in 46 suites and three end-to-end Playwright tests.
 
 Automated Tests by Component
 
 | Component | Files | Verified aspects |
 |---|---|---|
-| @traduce/shared | 5 | Tokens, authorization, errors, event contracts, retries and bus |
-| api-gateway | 1 | Prefix routing, CORS and public routes |
-| iam | 22 | Sign-up and verification, sign-in by status, recovery, roles and account deletion |
-| recognition | 11 | Translations, history, ADMIN-only templates and samples |
-| lexicon | 6 | Catalog, alphabet, search, categories and publishing |
-| analytics | 4 | Event recording and reports |
-| profile | 4 | Profile, preferences, notifications and achievements |
+| @traduce/shared | 7 | Tokens, authorization, errors, event contracts, retries and bus |
+| api-gateway | 3 | Prefix routing, CORS and public routes |
+| iam | 33 | Sign-up and verification, sign-in by status, recovery, roles and account deletion |
+| recognition | 17 | Translations, history, ADMIN-only templates and samples |
+| lexicon | 5 | Catalog, alphabet, search, categories and publishing |
+| analytics | 6 | Event recording and reports |
+| profile | 27 | Profile, preferences, notifications, achievements and daily challenges |
 
 ## Functional Cases and End-to-End Test
 
-Of the sixteen functional cases, thirteen passed and three are still pending: sign-up without accepting the terms, which does not yet have its own automated test, and two that require manual execution on a device (the unrecognized sign and history privacy). The end-to-end test of October 5, 2026, with all containers running, went through sign-up, sign-in, a translation, the achievement unlock and the recording of the usage event without errors.
+Of the twenty functional cases, fifteen passed and five are still pending: sign-up without accepting the terms, which does not yet have its own automated test; the history view by sessions and its own URL, which also lacks a test; and three that require manual review on a device (the unrecognized sign, history privacy and 30-day retention). The end-to-end test of October 5, 2026, with all containers running, went through sign-up, sign-in, a translation, the achievement unlock and the recording of the usage event without errors.
 
 ## Security and Defects
 
@@ -281,7 +281,7 @@ The work leaves three contributions: a working application designed for the Colo
 
 ## Future Work
 
-In the short term, tests will be integrated into GitHub Actions so that no change gets in with failing tests, load tests with k6 will be run, and structured logs and latency metrics will be added. In the next version the engine must take into account the position of the hand relative to the body and its movement. Finally, the pilot test with Deaf users at an educational institution is the missing step to meet the fourth specific objective and to measure the real effect of the tool on everyday communication.
+Continuous integration with GitHub Actions already runs in both repositories. In the short term, load tests with k6 will be run, and structured logs and latency metrics will be added. In the next version the engine must take into account the position of the hand relative to the body and its movement. Finally, the pilot test with Deaf users at an educational institution is the missing step to meet the fourth specific objective and to measure the real effect of the tool on everyday communication.
 
 ## Final Reflection
 

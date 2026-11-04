@@ -10,7 +10,7 @@ Juan Camilo Fierro Esquivel
 
 Instructor: Karol Daniela Correa
 
-5 de octubre de 2026
+4 de noviembre de 2026
 
 </div>
 
@@ -30,6 +30,7 @@ Instructor: Karol Daniela Correa
    - [5.3 Alfabeto](#53-alfabeto)
    - [5.4 Historial](#54-historial)
    - [5.5 Perfil](#55-perfil)
+   - [5.6 Retos diarios y medallas](#56-retos-diarios-y-medallas)
 - [6. Limitaciones conocidas](#6-limitaciones-conocidas)
 - [7. Tus datos y tu privacidad](#7-tus-datos-y-tu-privacidad)
 - [8. Si algo falla](#8-si-algo-falla)
@@ -49,6 +50,7 @@ Lo que hace hoy:
 - Reconoce señas con la cámara y las convierte en **texto**.
 - Lee el texto en **voz alta**.
 - Guarda lo traducido en un **historial** que puedes consultar y borrar.
+- Te propone un **reto diario** de traducción y te da **puntos** y **medallas**.
 
 Lo que **no** hace (no está en esta versión):
 
@@ -65,9 +67,9 @@ Lo que **no** hace (no está en esta versión):
 | Necesitas | Detalle |
 |-----------|---------|
 | Un dispositivo con cámara | Computador con webcam o celular. |
-| Un navegador reciente | La traducción de **palabras** funciona **solo en la versión web**. |
+| Un navegador reciente o la app del celular | La traducción con la cámara funciona en la versión web. En el celular, el modo **Palabras** se abre dentro de la app y necesita internet. |
 | Internet | La app descarga de internet las herramientas de reconocimiento (MediaPipe; Zhang et al., 2020) al abrir la cámara. |
-| Permiso de cámara | La primera vez el navegador te lo pide. Debes aceptarlo. |
+| Permiso de cámara | La primera vez el navegador o el teléfono te lo pide. Debes aceptarlo. |
 | Buena luz | Luz de frente o desde arriba; evita ventanas o lámparas detrás de ti. |
 | Buen encuadre | Que se vean tus manos completas y que haya espacio a los lados. |
 | Un correo electrónico | Para crear la cuenta y confirmarla con un código. |
@@ -76,7 +78,7 @@ Lo que **no** hace (no está en esta versión):
 
 ### 4.1 Acceso a la aplicación
 
-1. Abre la dirección que te dio quien administra la aplicación. En una instalación local normal es `http://127.0.0.1:8080` (ver el Manual de instalación).
+1. Abre la dirección que te dio quien administra la aplicación. En una instalación local normal es `http://localhost:8081` con la web de desarrollo, o la dirección pública de la aplicación (ver el Manual de instalación).
 2. Verás la página de inicio con las opciones **Registrarse** e **Iniciar sesión**. En la web también hay páginas de presentación (Nosotros, demostración del traductor y del alfabeto).
 
 **Figura 1**
@@ -89,7 +91,7 @@ Lo que **no** hace (no está en esta versión):
 
 1. En la página de inicio pulsa **Registrarse**.
 2. En **Crea tu Cuenta** escribe tu nombre completo, tu correo y una contraseña.
-3. La aplicación te pide una contraseña de **mínimo 8 caracteres** que combine mayúsculas, minúsculas, números y un símbolo (es una regla de la pantalla de registro). El indicador de seguridad te dice si es Débil, Media o Fuerte.
+3. La contraseña debe tener **mínimo 8 caracteres** y cumplir al menos **tres** de estos cuatro tipos: mayúsculas, minúsculas, números y símbolos. El indicador de seguridad te dice si es Débil, Media o Fuerte. Para que sea Fuerte necesita 12 caracteres o más y los cuatro tipos.
 4. Marca **Acepto los términos y condiciones**. Sin esto no puedes continuar.
 5. Pulsa **Registrarse**.
 
@@ -146,9 +148,9 @@ Mensajes posibles:
 | "Confirma tu correo para continuar" | Falta el código del paso 4.3. |
 | "Tu cuenta está bloqueada. Contacta al soporte." | Un administrador bloqueó la cuenta. |
 | "No se pudo conectar con el servidor..." | Revisa tu internet o avisa al administrador. |
-| "Tu sesión expiró. Inicia sesión de nuevo." | La sesión dura 1 día; vuelve a entrar. |
+| "Tu sesión expiró. Inicia sesión de nuevo." | La sesión tiene una duración fija y no se renueva sola: vuelve a entrar. |
 
-> **Los botones "Google" y "Facebook" todavía no funcionan.** Aparecen en la pantalla de inicio de sesión, pero no están conectados. Entra con correo y contraseña.
+> **Google y Facebook.** Estos botones funcionan cuando la aplicación tiene configurado ese acceso. Si un botón aparece desactivado o avisa de que no está configurado, entra con correo y contraseña. Con Google, si la cuenta es nueva, la app te pide aceptar los términos antes de crearla.
 
 Para **cerrar sesión**: ve al **botón con tu nombre**, arriba a la derecha, y pulsa **Cerrar sesión**.
 
@@ -162,8 +164,8 @@ Después de iniciar sesión verás la barra inferior (o superior en pantallas an
 
 La pantalla **Traducción** tiene dos modos, que eliges con dos botones:
 
-- **Palabras**: reconoce palabras completas de LSC. Es el modo que aparece por defecto. **Solo funciona en la versión web**. En celular verás el aviso "El reconocimiento de gestos solo está disponible en la versión web".
-- **Abecedario**: reconoce letras (deletreo).
+- **Palabras**: reconoce palabras completas de LSC. Es el modo que aparece por defecto. En la web usa la cámara del computador; en el celular se abre dentro de la app y necesita internet.
+- **Abecedario**: reconoce letras (deletreo). **Solo funciona en la versión web.** En el celular verás el aviso "En el móvil el reconocimiento de señas aún no está disponible. Usa la versión web para traducir con la cámara".
 
 **Figura 5**
 
@@ -174,7 +176,7 @@ La pantalla **Traducción** tiene dos modos, que eliges con dos botones:
 #### 5.1.1 Modo Palabras
 
 1. Elige **Palabras**.
-2. Pulsa **Iniciar cámara**. Si el navegador pide permiso, acéptalo.
+2. Pulsa **Iniciar cámara**. Si el navegador o el teléfono pide permiso, acéptalo.
 3. Espera a que termine "Cargando modelo de gestos..." (la primera vez tarda más).
 4. Colócate frente a la cámara, con las manos a la vista. Verás "Muestra una seña a la cámara".
 5. Haz la seña **completa, de forma clara y tranquila**. La pantalla indica "Señando…", "Analizando…".
@@ -193,7 +195,7 @@ Si ves "Confianza baja, repite la seña" o "No se pudo reconocer", repite la se�
 
 #### 5.1.2 Modo Abecedario
 
-1. Elige **Abecedario** y pulsa **Iniciar cámara**.
+1. Elige **Abecedario** y pulsa **Iniciar cámara**. Este modo funciona en la versión web.
 2. Haz la letra frente a la cámara y mantenla un momento.
 3. Las letras reconocidas se van sumando en **Texto reconocido**.
 4. Usa **Espacio** para separar palabras, **Borrar** para quitar la última letra y **Limpiar** para empezar de nuevo (la papelera borra las señas confirmadas del modo Palabras).
@@ -254,19 +256,19 @@ En **Perfil** puedes:
 |--------|----------|
 | **Tema** (Claro / Oscuro) | Cambia los colores de la app. |
 | **Idioma de la app** | Español, inglés, francés o portugués. |
-| **Cambiar contraseña** | Abre el flujo de cambio de contraseña. **Aún no cambia tu contraseña real** (las pantallas existen, pero no están conectadas al servidor). |
+| **Cambiar contraseña** | Cambia tu contraseña. Te pide la actual. Si tu cuenta se creó con Google y no tiene contraseña, la app te envía un código al correo para crear una. |
 | **Términos y condiciones** / **Política de privacidad** | Los textos legales de la app. Ver el aviso de la sección 7. |
 | **Logros** | Medallas con tu progreso, incluidas las que se ganan con puntos de reto (ver 5.6). |
 | **Cerrar sesión** | Sale de tu cuenta. |
-| **Eliminar cuenta** | Ver el aviso siguiente. |
+| **Eliminar cuenta** | Borra tu cuenta y tus datos. Ver el aviso siguiente. |
 
 **Figura 10**
 
-*Perfil de una cuenta ficticia; las cifras de la parte superior son fijas de ejemplo*
+*Perfil de una cuenta ficticia; las cifras de la parte superior son valores de ejemplo*
 
 ![Pantalla Perfil](capturas/usuario-10-perfil.png)
 
-> **"Eliminar cuenta" todavía no borra nada.** Hoy solo muestra un mensaje de confirmación; tu cuenta y tus datos **siguen existiendo**. Si necesitas que borren tus datos, pídelo a la persona que administra la aplicación (ver sección 7).
+> **Eliminar cuenta borra tu cuenta de forma definitiva.** La app te pedirá tu contraseña. Si la cuenta se creó con Google y no tiene contraseña, te enviará un código al correo y te pedirá ese código. Se borran tu cuenta, tu historial y tu progreso. Si eres el único administrador, la app no te deja borrar la cuenta.
 
 ### 5.6 Retos diarios y medallas
 
@@ -274,26 +276,24 @@ Cada día la app te propone un reto de traducción: guardar 1, 3, 5 u 8 traducci
 
 - En el **Perfil** verás una tarjeta con tu progreso del día. Se actualiza cada vez que guardas una traducción; solo cuentan las traducciones guardadas.
 - Al completar el reto ganas puntos (5, 10, 15 o 25, según la meta) y aparece un aviso en pantalla. Los puntos se cuentan una sola vez.
-- El Perfil muestra cuatro indicadores, entre ellos el total de tus puntos de reto, y se adaptan al tamaño de la pantalla.
-- Con los puntos de reto acumulados desbloqueas **medallas** en **Logros**. También verás un aviso cuando se desbloquea un logro.
-- Si desactivas las notificaciones en el Perfil, no recibes los avisos, pero tus puntos y tu reto completado se conservan.
+- El Perfil muestra el total de tus puntos de reto.
+- Con los puntos de reto acumulados desbloqueas **medallas** en **Logros**. Cuando desbloqueas una, aparece un aviso.
+- Si cierras un aviso, tus puntos y tu reto completado se guardan igual.
 
 ## 6. Limitaciones conocidas
 
 - **Vocabulario corto.** El modelo de palabras conoce 54 palabras, más el abecedario. Lo demás no lo reconoce.
 - **Cámara y luz.** El modelo aprendió de personas grabadas en un estudio. Con otra cámara, otra distancia o poca luz puede fallar aunque hagas bien la seña.
 - **Puede equivocarse.** Siempre revisa el texto. No uses la app como única fuente en situaciones importantes.
-- **Palabras solo en web.** En celular el modo Palabras no está disponible.
+- **Abecedario solo en la web.** En el celular el modo Abecedario no reconoce señas con la cámara. El modo Palabras en el celular necesita internet.
 - **Una sola dirección.** Solo de seña a texto o voz.
-- **Recuperar contraseña** ("¿Has olvidado tu contraseña?"): las pantallas existen, pero **hoy no envían el código ni cambian la contraseña** desde la interfaz. Si olvidas la contraseña, pide ayuda al administrador.
-- **Google y Facebook:** botones sin función.
 - **Estadísticas:** solo las ve el personal administrador.
 
 ## 7. Tus datos y tu privacidad
 
-- La app pide la cámara solo para reconocer señas. El procesamiento del reconocimiento se hace en tu navegador.
-- Se guardan tus datos de cuenta (nombre, correo, contraseña protegida) y tu historial de traducciones.
-- La normativa colombiana (Ley 1581 de 2012 y Decreto 1377 de 2013) te da derecho a conocer, corregir y pedir la supresión de tus datos. Como el botón **Eliminar cuenta** aún no funciona, hoy ese derecho se atiende **pidiéndolo al equipo administrador**.
+- La app pide la cámara solo para reconocer señas. El reconocimiento se procesa en tu dispositivo, dentro del navegador o de la app.
+- Se guardan tus datos de cuenta (nombre, correo, contraseña protegida), tu historial de traducciones y tu progreso de retos y logros. Las traducciones se borran solas a los 30 días de guardadas.
+- La normativa colombiana (Ley 1581 de 2012 y Decreto 1377 de 2013) te da derecho a conocer, corregir y pedir la supresión de tus datos. Puedes hacerlo tú mismo desde **Perfil**, con **Eliminar cuenta**. El borrado es definitivo.
 - Los textos de privacidad que muestra la app no se han verificado contra el funcionamiento real de esta versión; este manual no repite sus afirmaciones.
 
 ## 8. Si algo falla
@@ -304,12 +304,13 @@ Cada día la app te propone un reto de traducción: guardar 1, 3, 5 u 8 traducci
 
 | Problema | Qué hacer |
 |----------|-----------|
-| La cámara no enciende | Acepta el permiso de cámara en el navegador (icono del candado junto a la dirección). Cierra otras aplicaciones que usen la cámara. |
+| La cámara no enciende | Acepta el permiso de cámara en el navegador (icono del candado junto a la dirección) o en el teléfono. Cierra otras aplicaciones que usen la cámara. |
 | "Cargando modelo..." no termina | Revisa tu internet y recarga la página. |
 | No reconoce la seña | Más luz, manos centradas, repite con calma. Aléjate o acércate un poco. |
 | No llega el código al correo | Mira spam; espera 60 s y usa **Reenviar**. Máximo 5 por hora. |
 | "Código incorrecto o caducado" | Pide un código nuevo y úsalo antes de 15 minutos. |
 | "Tu sesión expiró" | Inicia sesión otra vez. |
+| El botón de Google o Facebook no hace nada | Ese acceso no está configurado en la app. Entra con correo y contraseña. |
 | La app no abre | Avisa al administrador: puede que el servicio esté apagado. |
 
 ## 9. Glosario mínimo
@@ -325,7 +326,7 @@ Cada día la app te propone un reto de traducción: guardar 1, 3, 5 u 8 traducci
 | **Abecedario / dactilología** | Deletrear con las manos, letra por letra. |
 | **Confianza** | Qué tan segura está la app de lo que reconoció. |
 | **Historial** | Lista de tus traducciones guardadas. |
-| **Sesión** | El tiempo en que estás dentro de tu cuenta (dura 1 día). |
+| **Sesión** | El tiempo en que estás dentro de tu cuenta. Tiene una duración fija y no se renueva sola. |
 | **Intérprete certificado** | Profesional acreditado en LSC. Esta app no lo reemplaza. |
 
 ## Referencias

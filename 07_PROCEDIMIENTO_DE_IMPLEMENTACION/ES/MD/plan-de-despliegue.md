@@ -35,7 +35,7 @@ Este plan reúne lo necesario para publicar Traduce Señas en el servidor del pr
 | **Campo** | **Valor** |
 |---|---|
 | Sistema | Traduce Señas: traductor de Lengua de Señas Colombiana (LSC) a texto |
-| Versión (Release Tag) | v1.0.0 |
+| Versión (Release Tag) | v1.0.0 (ventana del 15/10/2026). Versión vigente: backend 1.4.0 y frontend 1.3.1 |
 | Repositorio backend | github.com/mauro-1508/backendTS, rama develop, commit 028d4ab |
 | Repositorio frontend | github.com/tadeo77789/frontendTS, rama feat/vps-api-url, commit b4f5ef4 |
 | Repositorio de documentación | github.com/code-sena/trans-sl-docs, rama main |
@@ -166,7 +166,7 @@ Docker Compose crea una red bridge para el stack. Los contenedores se encuentran
 
 ### Enrutamiento y reverse proxy con TLS/HTTPS
 
-Hoy la aplicación móvil se conecta por HTTP directo a 179.236.77.215:8080, lo que obligó a permitir tráfico sin cifrar en Android. Este es el principal pendiente de seguridad: el siguiente despliegue pone Nginx como proxy inverso en los puertos 80 y 443 con un certificado de Let's Encrypt para un dominio propio, cierra el 8080 al exterior y cambia la URL de la aplicación a https.
+En la ventana del 15 de octubre, la aplicación móvil se conectó por HTTP directo a 179.236.77.215:8080, lo que obligó a permitir tráfico sin cifrar en Android. Ese era el principal pendiente de seguridad. El plan original proponía Nginx; el repositorio implementa en cambio Caddy (docker-compose.prod.yml y deploy/Caddyfile), que publica los puertos 80 y 443 con un certificado de Let's Encrypt para traducesenas.tech, reenvía /api al gateway y deja de publicar el 8080. La aplicación apunta a https://traducesenas.tech/api. Estado de este cambio en el VPS: comprobado el 4 de noviembre de 2026: HTTPS activo, HTTP redirige a HTTPS y `/api/health` responde `ok` con la versión 1.4.0 y los cinco servicios arriba.
 
 ## Matriz de ambientes, direccionamiento IP y puertos
 
@@ -319,7 +319,7 @@ Se acepta cuando aparecen las tablas de cada servicio, existen los roles USER y 
 ### Carga del archivo docker-compose.yml en Portainer
 
 1. Actualizar el código en el VPS: «git -C /opt/traduce/backend fetch && git -C /opt/traduce/backend checkout 028d4ab».
-2. En Portainer, ir a Stacks > Add stack, nombre «backend», opción Repository: URL https://github.com/mauro-1508/backendTS, referencia refs/heads/develop y ruta docker-compose.yml. Si el stack ya existe, abrirlo y usar Pull and redeploy.
+2. En Portainer, ir a Stacks > Add stack, nombre «backend», opción Repository: URL https://github.com/mauro-1508/backendTS, referencia refs/heads/main y ruta docker-compose.yml. Si el stack ya existe, abrirlo y usar Pull and redeploy.
 
 ### Inyección de variables de entorno del stack
 

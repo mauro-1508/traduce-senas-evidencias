@@ -157,9 +157,9 @@ The project is managed with Scrum (Schwaber & Sutherland, 2020) in two-week spri
 
 | **Name** | **Role** | **Responsibility** | **Contact** |
 |---|---|---|---|
-| Juan Mauricio Suaza Solórzano | Technical lead, Scrum Master, analyst and developer | Analysis, design, backend programming (lexicon and recognition), and coordination | suazasolorzano@gmail.com |
-| Luis Alejandro Duarte Aldana | Analyst and developer | Analysis, interface design, and programming | aleosea777@gmail.com |
-| Juan Camilo Fierro Esquivel | Analyst and developer | Analysis, product documentation, and programming | fierroesquiveljuancamilo@gmail.com |
+| Juan Mauricio Suaza Solórzano | Technical lead, Scrum Master, analyst and developer | Analysis, design, backend programming (lexicon and recognition), and coordination | Through the training programme |
+| Luis Alejandro Duarte Aldana | Analyst and developer | Analysis, interface design, and programming | Through the training programme |
+| Juan Camilo Fierro Esquivel | Analyst and developer | Analysis, product documentation, and programming | Through the training programme |
 
 *Note.* Apprentices from the Technologist in Software Analysis and Development program at SENA.
 

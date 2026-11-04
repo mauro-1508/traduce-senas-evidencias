@@ -157,9 +157,9 @@ El proyecto se gestiona con Scrum (Schwaber y Sutherland, 2020) en sprints de do
 
 | **Nombre** | **Rol** | **Responsabilidad** | **Contacto** |
 |---|---|---|---|
-| Juan Mauricio Suaza Solórzano | Líder técnico, Scrum Master, analista y desarrollador | Análisis, diseño, programación del backend (lexicon y recognition) y coordinación | suazasolorzano@gmail.com |
-| Luis Alejandro Duarte Aldana | Analista y desarrollador | Análisis, diseño de interfaces y programación | aleosea777@gmail.com |
-| Juan Camilo Fierro Esquivel | Analista y desarrollador | Análisis, documentación de producto y programación | fierroesquiveljuancamilo@gmail.com |
+| Juan Mauricio Suaza Solórzano | Líder técnico, Scrum Master, analista y desarrollador | Análisis, diseño, programación del backend (lexicon y recognition) y coordinación | A través del programa de formación |
+| Luis Alejandro Duarte Aldana | Analista y desarrollador | Análisis, diseño de interfaces y programación | A través del programa de formación |
+| Juan Camilo Fierro Esquivel | Analista y desarrollador | Análisis, documentación de producto y programación | A través del programa de formación |
 
 *Nota.* Aprendices del programa Tecnólogo en Análisis y Desarrollo de Software del SENA.
 

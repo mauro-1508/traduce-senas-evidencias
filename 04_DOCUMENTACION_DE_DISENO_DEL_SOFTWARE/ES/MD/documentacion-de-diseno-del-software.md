@@ -22,7 +22,7 @@
 
 El documento de diseño traduce los requisitos y el análisis de Traduce Señas en decisiones concretas de construcción. Reúne cuatro vistas: las interfaces gráficas que ve el usuario, el modelo arquitectónico que organiza los componentes, los patrones de diseño aplicados en el código y el modelo de datos que soporta la información del sistema.
 
-Las decisiones descritas aquí corresponden al código que existe en los repositorios del frontend y del backend (rama feat/microservices-split) y a los prototipos de alta fidelidad del repositorio de documentación.
+Las decisiones descritas aquí corresponden al código que existe en los repositorios del frontend y del backend (frontend 1.3.1 y backend 1.4.0) y a los prototipos de alta fidelidad del repositorio de documentación.
 
 # Diseño de interfaces gráficas
 
@@ -294,7 +294,7 @@ La tabla siguiente resume los patrones aplicados, dónde se usan y qué problema
 
 - **Datos relacionales en PostgreSQL** y muestras de gestos en **MongoDB**, porque su estructura varía y su volumen crece aparte.
 
-- **Borrado lógico** donde la ley o la auditoría lo exigen (historial, cuentas anonimizadas).
+- **Borrado lógico** en el historial de traducciones (`is_deleted`); la eliminación de una cuenta es física y los demás servicios reciben el evento iam.UserDeleted.
 
 - **Restricciones en la base de datos** para las reglas críticas: correo normalizado y único, estados válidos, códigos con intentos ≥ 0, una localización por idioma.
 
@@ -333,7 +333,7 @@ La tabla siguiente resume los patrones aplicados, dónde se usan y qué problema
 |---|---|---|---|
 | token_id | SERIAL | PK | Identificador |
 | user_id | INT | FK users | Dueño del código |
-| token_type | VARCHAR(30) | EMAIL_VERIFICATION / PASSWORD_RESET | Uso del código |
+| token_type | VARCHAR(30) | EMAIL_VERIFICATION / PASSWORD_RESET / ACCOUNT_DELETION | Uso del código |
 | token_hash | VARCHAR(255) | NOT NULL | Hash del código; nunca en texto plano |
 | attempts | INT | ≥ 0 | Intentos fallidos de validación |
 | expires_at / used_at | TIMESTAMPTZ | — | Vencimiento y uso único |
@@ -358,7 +358,7 @@ La tabla siguiente resume los patrones aplicados, dónde se usan y qué problema
 |---|---|---|---|
 | template_id | SERIAL | PK | Identificador |
 | label | VARCHAR(80) | NOT NULL | Seña representada (letra o palabra) |
-| kind | VARCHAR(10) | static / motion | Seña estática o con movimiento |
+| kind | VARCHAR(10) | static / motion / word | Seña estática, con movimiento o palabra (ADR-011) |
 | features | JSONB | NOT NULL | Puntos normalizados de la plantilla |
 
 **Tabla 10**
@@ -383,17 +383,17 @@ La tabla siguiente resume los patrones aplicados, dónde se usan y qué problema
 | usage_event | analytics | event_id único | Evento de uso por sección, tipo y señas |
 | user_profiles | profile | PK user_id lógico | Datos de presentación del usuario |
 | user_preferences | profile | ES/EN, LIGHT/DARK | Idioma, tema y notificaciones |
-| notifications | profile | Canal PUSH / EMAIL / IN_APP | Notificaciones solo visuales |
-| achievements | profile | Meta > 0 | Catálogo y progreso de logros; desde la migración 010 incluye medallas por puntos de reto |
-| challenges | profile | Definiciones activas ordenadas por código | Catálogo de retos diarios (TRANSLATE_1, 3, 5 y 8, con 5, 10, 15 y 25 puntos) y sus textos en español, inglés, francés y portugués |
+| notifications | profile | Canal IN_APP / EMAIL (PUSH sin uso) | Notificaciones solo visuales |
+| achievements | profile | Meta > 0 | Catálogo y progreso de logros; desde la migración 010 incluye medallas por puntos de reto (ADR-010) |
+| challenges | profile | Definiciones activas ordenadas por código | Catálogo de retos diarios (TRANSLATE_1, 3, 5 y 8, con 5, 10, 15 y 25 puntos; ADR-009) y sus textos en español, inglés, francés y portugués |
 | user_challenges | profile | Único por usuario y día | Instantánea del reto asignado a cada usuario: meta, avance y fecha de finalización |
 | challenge_rewards | profile | Una por asignación | Puntos de reto realmente concedidos; la suma alimenta las medallas |
 | admin_recipients, admin_report_runs | profile | Un envío por periodo | Destinatarios y control de los reportes semanales y mensuales por correo para administradores |
 | gesture_samples | recognition (MongoDB) | Consentimiento obligatorio | Muestras de entrenamiento |
 
-El modelo objetivo completo tiene 29 tablas agrupadas en diez dominios (identidad, autorización, perfil, léxico, traducción, IA, notificaciones, uso, gamificación y auditoría) y se mantiene en formato DBML en el repositorio de documentación (06-data/traduce_senas.dbml). Las tablas mostradas aquí son las que ya tienen migración en el código. Las migraciones vigentes de profile van de la 001 a la 010 (las tres últimas: 008 reportes al administrador, 009 retos diarios y 010 medallas por puntos de reto).
+El código vigente tiene 33 tablas en PostgreSQL, repartidas entre los cinco servicios de dominio, y una colección en MongoDB (gesture_samples). El modelo de referencia completo, con diez dominios (identidad, autorización, perfil, léxico, traducción, IA, notificaciones, uso, gamificación y auditoría), se mantiene en formato DBML en el repositorio de documentación (06-data/traduce_senas.dbml). Las tablas mostradas aquí son las que ya tienen migración en el código. Las migraciones vigentes de profile van de la 001 a la 010 (las tres últimas: 008 reportes al administrador, 009 retos diarios y 010 medallas por puntos de reto).
 
-Dos reglas de diseño recientes no cambian tablas. Las traducciones del historial se borran a los 30 días (recognition-service), y la aplicación muestra el historial agrupado por sesiones, una tarjeta por sesión. Además, cada pantalla web tiene su propia URL. Los reportes al administrador usan los tipos de notificación ADMIN_WEEKLY_REPORT y ADMIN_MONTHLY_REPORT y se entregan por correo (ADR-007). El reto del día cambia a medianoche, hora de Bogotá, y solo avanza con traducciones guardadas.
+Dos reglas de diseño recientes no cambian tablas. Las traducciones del historial se borran a los 30 días (recognition-service), y la aplicación muestra el historial agrupado por sesiones, una tarjeta por sesión. Además, cada pantalla web tiene su propia URL. Los reportes semanal y mensual y el recordatorio del modelo usan los tipos ADMIN_WEEKLY_REPORT, ADMIN_MONTHLY_REPORT y ADMIN_MODEL_REMINDER, y se entregan como aviso en la app y por correo (ADR-007). El reto del día cambia a medianoche, hora de Bogotá, y solo avanza con traducciones guardadas.
 
 # Conclusiones
 

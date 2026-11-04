@@ -85,7 +85,7 @@ La auditoría de código y de seguridad de la fase 4 de la migración a microser
 | AC-10 | El descargador del conjunto LSC-54 omitía videos sin avisar | Error de lectura por rangos de bytes | Corrección del cálculo de rangos y prueba con muestra real | Alta | Cerrada |
 | AC-11 | La descarga se detenía con HTTP 429 | 16 conexiones simultáneas superaban el límite del servidor | 4 conexiones, bloques más grandes y espera ante el código 429 | Media | Cerrada |
 
-*Nota.* Verificación: la suite automatizada del backend terminó con 494 pruebas aprobadas y 0 fallidas el 7 de octubre de 2026.
+*Nota.* Verificación: la suite automatizada del backend terminó con 494 pruebas aprobadas y 0 fallidas el 7 de octubre de 2026 (hito de la auditoría). Estado vigente, 4 de noviembre de 2026: 918 pruebas aprobadas, 0 fallidas y 13 omitidas por requerir PostgreSQL en el equipo local.
 
 # Acciones preventivas
 
@@ -122,7 +122,7 @@ Las acciones preventivas atacan los riesgos del proyecto antes de que se convier
 | AM-05 | Motor de reconocimiento que considere ubicación y movimiento de la mano | Distinguir señas como «buenos días», «buenas tardes» y «buenas noches» | Alta | Siguiente versión |
 | AM-06 | Reconocimiento de señas con dos manos | Cubrir la mayoría de las señas del conjunto LSC-54 | Media | Siguiente versión |
 | AM-07 | Pruebas de carga con k6 en el pipeline | Detectar degradación antes de producción | Media | Dos sprints |
-| AM-08 | Integración continua en GitHub Actions (build + pruebas) | Ningún cambio se integra con pruebas en rojo | Alta | Próximo sprint |
+| AM-08 | Integración continua en GitHub Actions (build + pruebas) | Ningún cambio se integra con pruebas en rojo | Alta | Cerrada: ci.yml en el backend y en el frontend |
 | AM-09 | Completar prototipos faltantes (notificaciones y otras 2 pantallas) | Diseño completo de las 21 pantallas | Baja | Dos sprints |
 | AM-10 | Prueba piloto con usuarios sordos en una institución educativa | Validación real del objetivo específico 4 | Alta | Siguiente versión |
 

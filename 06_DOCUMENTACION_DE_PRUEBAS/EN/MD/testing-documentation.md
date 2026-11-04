@@ -56,11 +56,11 @@ The test pyramid is applied: many fast unit tests at the base, fewer integration
 
 ## Items to test
 
-- api-gateway and the five microservices (branch develop, commit 2993301).
+- api-gateway and the five microservices (backend version 1.4.0, branch main, commit a962982).
 
 - Shared package @traduce/shared.
 
-- Client application on Android and in a desktop browser, with unit tests for its logic: validations, API client, authentication flows, and recognition (branch chore/frontend-unit-tests).
+- Client application on Android and in a desktop browser, with unit tests for its logic: validations, API client, authentication flows, and recognition (frontend version 1.3.1, branch main, commit a5e231d).
 
 ## Items out of scope for this iteration
 
@@ -105,7 +105,7 @@ The test pyramid is applied: many fast unit tests at the base, fewer integration
 
 # Results of the automated tests
 
-The automated suites were run with “npm test” in each repository. In the backend, the command builds the shared package and runs the tests of all services with the native Node.js test runner; in the frontend, it runs Jest with the Expo preset (jest-expo). The result was as follows:
+The automated suites were run with “npm test” in each repository. In the backend, the command builds the shared package and runs the tests of all services with the native Node.js test runner; in the frontend, it runs Jest with the Expo preset (jest-expo). The current result, from the run of November 4, 2026, is: in the backend, 918 tests passed, 0 failed and 13 skipped because they require PostgreSQL on the local machine; in the frontend, 469 tests in 46 suites, all passed. The first frontend run had a 5 s timeout in AchievementUnlockAlerts.test.tsx with the machine under load; it passed after raising the wait time to 30 s (“--testTimeout=30000”). Table 4 keeps the October 16, 2026 run as a historical reference:
 
 **Table 4**
 
@@ -120,7 +120,7 @@ The automated suites were run with “npm test” in each repository. In the bac
 | Skipped / cancelled | 2 / 0 | 0 / 0 |
 | Total duration | 22 seconds | 3 seconds |
 
-*Note.* Backend: branch develop, commit 2993301; the 2 skipped tests need a test PostgreSQL database (variable PROFILE_TEST_DATABASE_URL). Frontend: branch chore/frontend-unit-tests, commit 6219c0d.
+*Note.* Run of October 16, 2026. Backend: branch develop, commit 2993301; the 2 skipped tests need a test PostgreSQL database (variable PROFILE_TEST_DATABASE_URL). Frontend: branch chore/frontend-unit-tests, commit 6219c0d.
 
 **Table 5**
 
@@ -128,18 +128,18 @@ The automated suites were run with “npm test” in each repository. In the bac
 
 | **Component** | **Test files** | **Aspects verified** | **Line coverage** |
 |---|---|---|---|
-| @traduce/shared | 5 | JWT provider, authMiddleware, requireRole, requirePermission, error handler, configuration, event validators, exponential retry, in-memory bus, and RabbitMQ | 99.5% |
-| api-gateway | 1 | Prefix-based routing, CORS with allowlist, configuration, public routes, rate limiting | 100% |
-| iam-service | 30 | Registration with email verification, login according to status and with Google or Facebook, password recovery, JWT with roles and permissions, account change and deletion (also with an email code), event delivery through an outbox, email templates | 89.3% |
-| recognition-service | 13 | Translations, history, sign templates (ADMIN only), samples, consumption of lexicon events with contract, and rejection of writes from deleted accounts | 86.0% |
+| @traduce/shared | 7 | JWT provider, authMiddleware, requireRole, requirePermission, error handler, configuration, event validators, exponential retry, in-memory bus, and RabbitMQ | 99.5% |
+| api-gateway | 3 | Prefix-based routing, CORS with allowlist, configuration, public routes, rate limiting | 100% |
+| iam-service | 33 | Registration with email verification, login according to status and with Google or Facebook, password recovery, JWT with roles and permissions, account change and deletion (also with an email code), event delivery through an outbox, email templates | 89.3% |
+| recognition-service | 17 | Translations, history, sign templates (ADMIN only), samples, consumption of lexicon events with contract, and rejection of writes from deleted accounts | 86.0% |
 | lexicon-service | 5 | Catalog, alphabet, search, categories, publication, and withdrawal of signs | 83.5% |
 | analytics-service | 6 | Event logging, reports, event handlers, and atomic erasure of an account's data | 95.1% |
-| profile-service | 11 | Profile, preferences with permissions and creation of a missing profile, notifications, achievements under concurrent updates, account deletion, and profile recovery | 83.5% |
-| Frontend (client application) | 8 | Email and password validation, API client (errors, token sent only to the API, single expired-session notice), confirm-email and password-recovery flows, resend countdown, hand normalization, and KNN classifier | 4.5% |
+| profile-service | 27 | Profile, preferences with permissions and creation of a missing profile, notifications, achievements under concurrent updates, account deletion, and profile recovery | 83.5% |
+| Frontend (client application) | 46 Jest (plus 3 Playwright E2E) | Email and password validation, API client (errors, token sent only to the API, single expired-session notice), confirm-email and password-recovery flows, resend countdown, hand normalization, and KNN classifier | 4.5% |
 
-*Note.* Line coverage measured on October 16, 2026 with the built-in node:test coverage in the backend (88.5% in total) and with “jest --coverage” in the frontend. That run predates the tests described below, so the figures in Tables 4 and 5 do not include them.
+*Note.* Line coverage figures were measured on October 16, 2026 with the built-in node:test coverage in the backend (88.5% in total) and with “jest --coverage” in the frontend. That run predates the tests described below and has not been repeated. The test-file column of Table 5 is from November 4, 2026 and counts the files of each component on the main branch.
 
-**Tests added after that run.** In the frontend (version 1.2.0), Jest tests were added for the services, the authentication forms, the vision classifiers and the template stores, plus an end-to-end suite with Playwright (e2e/ folder: auth, alphabet and history). The suite runs with “npm run e2e” on the exported web app, against the backend started with Docker Compose, with a single worker (the gateway limits logins per minute), a phone-sized viewport and the browser's fake camera; in CI it runs against the backend in compose. In the backend (profile-service), tests were added for daily challenges (domain, use cases, API and real PostgreSQL), challenge-point medals and the emails sent to administrators.
+**Tests added after that run.** In the frontend (current version 1.3.1), Jest tests were added for the services, the authentication forms, the vision classifiers and the template stores, plus an end-to-end suite with Playwright (e2e/ folder: auth, alphabet and history). The suite runs with “npm run e2e” on the exported web app, against the backend started with Docker Compose, with a single worker (the gateway limits logins per minute), a phone-sized viewport and the browser's fake camera; in CI it runs against the backend in compose. In the backend (profile-service), tests were added for daily challenges (domain, use cases, API and real PostgreSQL), challenge-point medals and the emails sent to administrators.
 
 # Functional test cases
 
@@ -164,13 +164,13 @@ The following cases verify the critical requirements. The “Passed” status in
 | CP-11 | FR-405 | Sign not recognized | Gesture outside the vocabulary | Visual notice; no word is shown | Pending (manual test on device) |
 | CP-12 | FR-304, FR-310 | Alphabet query | GET /api/lexicon/alphabet | Only LSC letters in ACTIVE status | Passed (automated) |
 | CP-13 | FR-406 | Private history | User A queries the history of B | Sees only their own translations | Pending (manual test) |
-| CP-14 | FR-806, FR-807 | Daily challenge completed | User who saves as many translations as the day's target | Progress up to the target; reward stored only once; CHALLENGE_COMPLETED notice | Pending (automated tests exist in profile-service; no result in this report) |
-| CP-15 | FR-808 | Challenge-point medal | User who accumulates challenge points | GET /api/profile/challenges/rewards/summary returns the total; the medal is granted once | Pending (same) |
-| CP-16 | FR-409, FR-707 | History by sessions and own URL | Open the history by its URL with several saved translations | One card per session; the screen reloads without losing the route | Pending (the Playwright suite covers history; result not yet recorded) |
+| CP-14 | FR-806, FR-807 | Daily challenge completed | User who saves as many translations as the day's target | Progress up to the target; reward stored only once; CHALLENGE_COMPLETED notice | Passed (automated, run of November 4, 2026) |
+| CP-15 | FR-808 | Challenge-point medal | User who accumulates challenge points | GET /api/profile/challenges/rewards/summary returns the total; the medal is granted once | Passed (automated, run of November 4, 2026) |
+| CP-16 | FR-409, FR-707 | History by sessions and own URL | Open the history by its URL with several saved translations | One card per session; the screen reloads without losing the route | Pending (the history E2E covers saving and deleting a translation, but not the sessions or the own URL) |
 | CP-17 | FR-410 | 30-day retention | Translation older than 30 days | The translation no longer appears in the history | Pending (manual test) |
-| CP-14 | FR-014 | Delete account | Authenticated user | Data deleted in one transaction and usage events anonymized | Passed (automated) |
-| CP-16 | FR-602 | Sample without consent | Sample without consent field | 400; the sample is not saved | Passed (automated) |
-| CP-15 | FR-706 | Statistics with USER role | Token without permission | 403 Forbidden | Passed (automated) |
+| CP-18 | FR-014 | Delete account | Authenticated user | Data deleted in one transaction and usage events anonymized | Passed (automated) |
+| CP-19 | FR-602 | Sample without consent | Sample without consent field | 400; the sample is not saved | Passed (automated) |
+| CP-20 | FR-706 | Statistics with USER role | Token without permission | 403 Forbidden | Passed (automated) |
 
 *Note.* The end-to-end test with Docker (registration → login → translation → achievement and usage event) was executed on October 5, 2026.
 
@@ -217,7 +217,7 @@ For the 20 new words, the public LSC-54 set is used (Mora-Zarate et al., 2025), 
 
 # Conclusions
 
-The backend passes its entire automated suite (683 tests: 681 passed, 0 failures, and 2 skipped because they need a test database) with 88.5% line coverage, above the 80% target. The frontend has its first 79 unit tests, all passing, although its coverage is still low (4.5%). The critical end-to-end flows work with all services deployed in Docker. Pending items are continuous integration to run the tests on every change, extending the frontend tests to the screens, the k6 performance tests, the screen reader tests, the measurement of recognition accuracy for the new words, and the pilot test with real users, which are scheduled for the next iteration.
+The backend passes its automated suite: 918 tests passed and none failed; 13 are skipped on the local machine because they need a PostgreSQL database. The frontend passes its 469 Jest tests (46 suites), and its 3 end-to-end Playwright tests run in CI. Line coverage was last measured on October 16, 2026: 88.5% in the backend, above the 80% target, and 4.5% in the frontend, which is still low. Jest has no coverage threshold configured, although ADR-006 sets an 80% gate. Continuous integration already runs in both repositories. The critical end-to-end flows work with all services deployed in Docker. Pending items are extending the frontend tests to the screens, the k6 performance tests, the screen reader tests, the measurement of recognition accuracy for the new words, and the pilot test with real users, which are scheduled for the next iteration.
 
 # References
 

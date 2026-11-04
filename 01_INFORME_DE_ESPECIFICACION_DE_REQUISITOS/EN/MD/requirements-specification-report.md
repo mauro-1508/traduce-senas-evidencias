@@ -66,9 +66,9 @@ The following are out of scope for this version: reverse translation (from text 
 
 | **Name** | **Role** | **Responsibility** | **Contact** |
 |---|---|---|---|
-| Juan Mauricio Suaza Solórzano | Technical lead, Scrum Master, analyst, and developer | Analysis, design, backend programming (lexicon and recognition), and coordination | suazasolorzano@gmail.com |
-| Luis Alejandro Duarte Aldana | Analyst and developer | Analysis, interface design, and programming | aleosea777@gmail.com |
-| Juan Camilo Fierro Esquivel | Analyst and developer | Analysis, product documentation, and programming | fierroesquiveljuancamilo@gmail.com |
+| Juan Mauricio Suaza Solórzano | Technical lead, Scrum Master, analyst, and developer | Analysis, design, backend programming (lexicon and recognition), and coordination | Through the training programme |
+| Luis Alejandro Duarte Aldana | Analyst and developer | Analysis, interface design, and programming | Through the training programme |
+| Juan Camilo Fierro Esquivel | Analyst and developer | Analysis, product documentation, and programming | Through the training programme |
 
 *Note.* Apprentices in the Technologist in Software Analysis and Development program at SENA.
 
@@ -160,9 +160,9 @@ The interface is inclusive, intuitive, and accessible: large buttons (minimum 48
 
 ### Software interfaces
 
-- Android 9 (API 28) or later.
+- Android 7.0 (API 24) or later.
 
-- iOS 14 or later.
+- iOS 15.1 or later.
 
 - Up-to-date desktop browsers with WebAssembly and camera access support (Chrome, Edge, Firefox).
 
@@ -200,7 +200,7 @@ Table 4 summarizes the eleven functional requirements of the system and their sp
 | RF10 | Error handling | ERF10.1 Error classification and query | Medium |
 | RF11 | Password policy | ERF11.1 Policy configuration | Medium |
 
-*Note.* The status of RF8 to RF11 is pending a team decision.
+*Note.* RF8 (gamification) is implemented, including daily challenges and medals according to ADR-009 and ADR-010. RF9 and RF10 are not implemented yet. RF11 only has password validation with fixed rules (FR-906); the configurable policy does not exist yet.
 
 ### Identity module (iam-service)
 
@@ -210,7 +210,7 @@ Table 4 summarizes the eleven functional requirements of the system and their sp
 
 | **ID** | **Description** | **Source** | **Priority** |
 |---|---|---|---|
-| FR-001 | Register a user with name, email, a valid password, and acceptance of the terms with date and version; the account is created as INACTIVE until the email is verified | RF1 | Must |
+| FR-001 | Register a user with name, email, a valid password, and acceptance of the terms with date and version, without birth date or username; the account is created as INACTIVE until the email is verified | RF1 | Must |
 | FR-002 | Reject registration unless the terms are accepted, and store the accepted date and version | RF1 | Must |
 | FR-003 | Verify the email with a 6-digit code | RF1 | Must |
 | FR-004 | Store codes only as hashes, with expiration, single use, and an attempt counter | RF1 | Must |
@@ -218,11 +218,11 @@ Table 4 summarizes the eleven functional requirements of the system and their sp
 | FR-006 | Temporarily lock the account after failed attempts (1, 5, and 10 minutes) | RF1 | Must |
 | FR-008 | Registration and sign-in with Google and Facebook | RF1 | Must |
 | FR-010 | Recover the password with a single-use code that expires | RF1 | Must |
-| FR-012 | Rotate refresh tokens and detect their reuse | RF1 | Must |
-| FR-014 | Delete the account by anonymizing the data (Ley 1581 de 2012) | RF1, RF5 | Should |
+| FR-012 | Withdrawn. Formerly: rotate refresh tokens. No refresh token exists: the session is a JWT that lasts one day | RF1 | — |
+| FR-014 | Delete the account, confirmed with a code sent to the email: the user row is deleted, and the iam.UserDeleted event makes the other services erase or unlink their copies (Ley 1581 de 2012) | RF1, RF5 | Should |
 | FR-015 | The administrator lists, locks, restores, and deactivates accounts | RF1, RF6 | Should |
 
-*Note.* MoSCoW priority (Must, Should, Could). The complete catalog contains 79 requirements (04-requirements/functional.md); these tables show the representative ones for each module.
+*Note.* MoSCoW priority (Must, Should, Could). The complete catalog contains 88 functional requirements, 85 active and 3 withdrawn (04-requirements/functional.md); these tables show the representative ones for each module.
 
 ### Authorization module (iam-service)
 
@@ -251,8 +251,10 @@ Table 4 summarizes the eleven functional requirements of the system and their sp
 | FR-204 | Choose the interface language (Spanish, English, French, and Portuguese) | RF5 | Should |
 | FR-205 | Enable or disable all notifications with a single toggle | RF4, RF5 | Must |
 | FR-502 | Deliver notifications only through visual channels: in-app and email (no push, ADR-007) | RF4 | Must |
+| FR-503 | Withdrawn (ADR-007). Formerly: register devices for push notifications. Push is replaced by email, and no device table exists | RF4 | — |
 | FR-507 | Mark a notification as read | RF4 | Must |
-| FR-510 | Send administrators with notifications enabled a weekly and a monthly report by email, with a link to the admin panel | RF4, RF6 | Could |
+| FR-509 | Withdrawn (ADR-007). Formerly: every push notification must have a target device. No push notification is created | RF4 | — |
+| FR-510 | Send administrators with notifications enabled the weekly and monthly usage reports and the weekly model reminder (MODEL_REMINDER), as an in-app notice and by email, with a button to the admin panel | RF4, RF6 | Should |
 
 ### Lexicon module (lexicon-service)
 
@@ -286,6 +288,7 @@ Table 4 summarizes the eleven functional requirements of the system and their sp
 | FR-407 | Delete history entries (logical deletion) | RF5 | Should |
 | FR-409 | Show the history grouped by sessions, with one card per session | RF3, RF5 | Should |
 | FR-410 | Delete history translations 30 days after they were created | RF5 | Should |
+| FR-411 | The administrator adds words without retraining the model: they are saved as word-type templates (30 frames of 128 values) and, on the device, are matched with DTW before the model (ADR-011) | RF3 | Should |
 | FR-601 | Capture gesture samples grouped by capture session | RF3 | Must |
 | FR-602 | Do not store any sample without verifiable consent | — | Must |
 | FR-605 | Maintain a registry of models with their training metrics | RF3 | Must |
@@ -320,18 +323,16 @@ Table 4 summarizes the eleven functional requirements of the system and their sp
 
 | **Code** | **Attribute** | **Requirement and metric** |
 |---|---|---|
-| RNF1 | Performance | End-to-end response of 5 s or less; P95 latency < 300 ms in critical services (login, translations, lexicon) with 50 requests per second; ≥ 15 frames per second during capture |
-| RNF2 | Usability | Simple interface; a new user completes a translation without help in less than 2 minutes |
-| RNF3 | Compatibility | Android 9+, iOS 14+, and up-to-date desktop browsers |
-| RNF4 | Security | Passwords hashed with bcrypt; mandatory JWT with a secret of 32+ characters; progressive lockout; request rate limit on /api/auth; HTTPS in production |
-| RNF5 | Adaptability / scalability | 500 concurrent users and 5,000 registered; each microservice scales independently |
-| RNF6 | Documentation | Technical, installation, and user manuals; OpenAPI contracts for each service |
-| RNF7 | Fault tolerance | A failure in one service does not stop the others; the event bus reconnects automatically |
-| RNF8 | Personal data protection | Explicit authorization with date and version; right of erasure; samples disassociated from identity |
-| RNF9 | Accessibility | WCAG 2.1 Level AA as the target; no information conveyed by sound alone; contrast 4.5:1; touch targets of 48 dp |
-| RNF10 | Observability | GET /health endpoint in each service; structured logs and classified errors |
-| RNF11 | Maintainability | Hexagonal architecture; unit test coverage ≥ 80%; commit and branch conventions |
-| RNF12 | Disaster recovery | Daily database backups; documented restoration in less than 4 hours |
+| RNF1 | Accessibility | WCAG 2.1 Level AA as the target; no information conveyed by sound alone; contrast 4.5:1; touch targets of 48 dp; notifications use visual channels only |
+| RNF2 | Performance | P95 latency below 300 ms on critical services under 50 requests per second; recognition of each sign in under 500 ms; ≥ 15 frames per second during capture; model accuracy ≥ 85% before publishing |
+| RNF3 | Availability | Production SLO of 99.5%; without connection, the alphabet and history are read from cache and notifications are deferred |
+| RNF4 | Scalability | 500 concurrent users and 5,000 registered; each microservice scales independently; lexicon of up to 5,000 signs without query degradation |
+| RNF5 | Security | Passwords hashed with bcrypt (cost 10 today; target 12); mandatory JWT valid for one day, with no refresh token; progressive lockout; limit of 10 requests per minute per IP on sign-in and recovery; HTTPS in production |
+| RNF6 | Observability | GET /health endpoint in each service and GET /health/ready for readiness; structured logs with a correlation ID and classified errors |
+| RNF7 | Maintainability | Test coverage ≥ 80% of lines (≥ 90% in the domain); cyclomatic complexity ≤ 10 per method; schema changes only through versioned migrations |
+| RNF8 | Portability | Backend deployed as a Docker image; PostgreSQL 15 or later and MongoDB 6 or later; configuration only through environment variables; mobile app from Android 7.0 (API 24) and iOS 15.1 |
+| RNF9 | Usability | First translation in under 3 minutes from opening the app (test with 5 users); registration in 4 screens or fewer; error messages in plain language |
+| RNF10 | Disaster recovery | Daily PostgreSQL and MongoDB backups as the target (today, manual dumps), with 30-day retention; RTO under 30 min and RPO under 24 h for PostgreSQL; quarterly restore drill |
 
 *Note.* Accessibility is treated as a primary constraint because the primary users are deaf people (World Wide Web Consortium [W3C], 2018).
 
@@ -429,7 +430,7 @@ Table 4 summarizes the eleven functional requirements of the system and their sp
 
 # Traceability
 
-Each functional requirement is linked to the user story that plans it and to the tables that persist it. The complete traceability matrix is maintained in the documentation repository (04-requirements/traceability-matrix.md). Table 18 summarizes the implementation status of the 79 detailed requirements according to that matrix.
+Each functional requirement is linked to the user story that plans it and to the tables that persist it. The complete traceability matrix is maintained in the documentation repository (04-requirements/traceability-matrix.md). Table 18 summarizes the implementation status of the 85 active detailed requirements according to that matrix.
 
 **Table 18**
 
@@ -437,15 +438,15 @@ Each functional requirement is linked to the user story that plans it and to the
 
 | **Status** | **Detailed requirements** |
 |---|---|
-| Covered | 47 |
+| Covered | 57 |
 | Partial | 10 |
-| Not implemented | 20 |
+| Not implemented | 16 |
 | Not verified | 2 |
-| **Total** | **79** |
+| **Total** | **85** |
 
 # Conclusions
 
-The specification defines eleven functional requirements, broken down into 79 detailed requirements, and twelve nonfunctional requirements. Of the 79 detailed requirements, 47 are covered, 10 are partial, 20 are not implemented, and 2 are not verified. Accessibility and personal data protection are established as primary constraints due to the nature of the users and of the biometric information the system handles.
+The specification defines eleven functional requirements, broken down into 88 detailed requirements (85 active and 3 withdrawn), and ten nonfunctional requirements. Of the 85 active requirements, 57 are covered, 10 are partial, 16 are not implemented, and 2 are not verified. Accessibility and personal data protection are established as primary constraints due to the nature of the users and of the biometric information the system handles.
 
 This document is the baseline for analysis, design, and testing; any change in scope must be recorded here and in the traceability matrix before it is implemented.
 

@@ -35,7 +35,7 @@ Este plan reúne lo necesario para publicar Traduce Señas en el servidor del pr
 | **Campo** | **Valor** |
 |---|---|
 | Sistema | Traduce Señas: traductor de Lengua de Señas Colombiana (LSC) a texto |
-| Versión (Release Tag) | v1.0.0 |
+| Versión (Release Tag) | v1.0.0 (ventana del 15/10/2026). Versión vigente: backend 1.4.0 y frontend 1.3.1 |
 | Repositorio backend | github.com/mauro-1508/backendTS, rama develop, commit 028d4ab |
 | Repositorio frontend | github.com/tadeo77789/frontendTS, rama feat/vps-api-url, commit b4f5ef4 |
 | Repositorio de documentación | github.com/code-sena/trans-sl-docs, rama main |
@@ -69,7 +69,7 @@ Se eligió la franja de la tarde porque el uso de la aplicación es bajo y el eq
 |---|---|---|
 | Local | Equipo de cada integrante con Docker Desktop | Desarrollo y pruebas unitarias |
 | Staging | No disponible todavía | Se reemplaza por una prueba completa con Docker en local antes de cada despliegue |
-| Producción | VPS de Hostinger, IP pública 179.236.77.215 | Backend de la aplicación móvil y web |
+| Producción | VPS de Hostinger, dominio traducesenas.tech | Backend de la aplicación móvil y web |
 
 ### Matriz de roles y responsables
 
@@ -166,7 +166,7 @@ Docker Compose crea una red bridge para el stack. Los contenedores se encuentran
 
 ### Enrutamiento y reverse proxy con TLS/HTTPS
 
-Hoy la aplicación móvil se conecta por HTTP directo a 179.236.77.215:8080, lo que obligó a permitir tráfico sin cifrar en Android. Este es el principal pendiente de seguridad: el siguiente despliegue pone Nginx como proxy inverso en los puertos 80 y 443 con un certificado de Let's Encrypt para un dominio propio, cierra el 8080 al exterior y cambia la URL de la aplicación a https.
+En la ventana del 15 de octubre, la aplicación móvil se conectó por HTTP directo a la IP pública del servidor, puerto 8080, lo que obligó a permitir tráfico sin cifrar en Android. Ese era el principal pendiente de seguridad. El plan original proponía Nginx; el repositorio implementa en cambio Caddy (docker-compose.prod.yml y deploy/Caddyfile), que publica los puertos 80 y 443 con un certificado de Let's Encrypt para traducesenas.tech, reenvía /api al gateway y deja de publicar el 8080. La aplicación apunta a https://traducesenas.tech/api. Estado de este cambio en el VPS: comprobado el 4 de noviembre de 2026: HTTPS activo, HTTP redirige a HTTPS y `/api/health` responde `ok` con la versión 1.4.0 y los cinco servicios arriba.
 
 ## Matriz de ambientes, direccionamiento IP y puertos
 
@@ -277,7 +277,7 @@ Los servicios corren con NODE_ENV=production desde la imagen. Para evitar que un
 1. Entrar al VPS con la llave SSH y abrir el túnel hacia Portainer:
 
 ```
-ssh -L 9443:127.0.0.1:9443 usuario@179.236.77.215
+ssh -L 9443:127.0.0.1:9443 usuario@traducesenas.tech
 ```
 
 2. Si Portainer no está instalado, crearlo una sola vez:
@@ -319,7 +319,7 @@ Se acepta cuando aparecen las tablas de cada servicio, existen los roles USER y 
 ### Carga del archivo docker-compose.yml en Portainer
 
 1. Actualizar el código en el VPS: «git -C /opt/traduce/backend fetch && git -C /opt/traduce/backend checkout 028d4ab».
-2. En Portainer, ir a Stacks > Add stack, nombre «backend», opción Repository: URL https://github.com/mauro-1508/backendTS, referencia refs/heads/develop y ruta docker-compose.yml. Si el stack ya existe, abrirlo y usar Pull and redeploy.
+2. En Portainer, ir a Stacks > Add stack, nombre «backend», opción Repository: URL https://github.com/mauro-1508/backendTS, referencia refs/heads/main y ruta docker-compose.yml. Si el stack ya existe, abrirlo y usar Pull and redeploy.
 
 ### Inyección de variables de entorno del stack
 
@@ -342,7 +342,7 @@ Los servicios esperan a que su base de datos y RabbitMQ estén sanos antes de ar
 
 En esta versión se publica el gateway directamente en el puerto 8080 sin dominio. Para el siguiente despliegue:
 
-1. Registrar el dominio y crear un registro A hacia 179.236.77.215.
+1. Registrar el dominio y crear un registro A hacia la IP pública del VPS.
 2. Instalar Nginx y Certbot y obtener el certificado: «sudo certbot --nginx -d api.dominio».
 3. Configurar «location /api/ { proxy_pass http://127.0.0.1:8080; }» y redirigir el puerto 80 al 443.
 4. Publicar el gateway solo en 127.0.0.1:8080 y cerrar el 8080 en el firewall.
@@ -359,8 +359,8 @@ En esta versión se publica el gateway directamente en el puerto 8080 sin domini
 | **N.º** | **Servicio** | **Enlace o comando** | **Resultado esperado** |
 |---|---|---|---|
 | 1 | Panel Portainer | https://localhost:9443 (por túnel SSH) | Stack «backend» con 12 contenedores running |
-| 2 | Interfaz de la aplicación | APK instalado o Expo apuntando a http://179.236.77.215:8080/api | Pantalla de inicio y alfabeto cargados |
-| 3 | Salud del backend | http://179.236.77.215:8080/health | 200 OK con los cinco servicios en «up» |
+| 2 | Interfaz de la aplicación | APK instalado o Expo apuntando a https://traducesenas.tech/api | Pantalla de inicio y alfabeto cargados |
+| 3 | Salud del backend | https://traducesenas.tech/api/health | 200 OK con los cinco servicios en «up» |
 | 4 | Documentación de la API | Contratos OpenAPI en docs/07-api/contracts del repositorio de documentación | Un contrato por servicio |
 | 5 | Conectividad TCP a bases de datos | En el VPS: «docker compose exec postgres-iam pg_isready -U postgres» | accepting connections |
 
@@ -382,7 +382,7 @@ Los contratos OpenAPI 3 de cada servicio están en el repositorio de documentaci
 
 ### Conectividad TCP directa a motor de base de datos
 
-Las bases no aceptan conexiones desde internet. Para revisarlas desde un equipo del equipo de trabajo se usa un túnel: «ssh -L 5433:127.0.0.1:5433 usuario@179.236.77.215» y luego un cliente como DBeaver contra localhost:5433.
+Las bases no aceptan conexiones desde internet. Para revisarlas desde un equipo del equipo de trabajo se usa un túnel: «ssh -L 5433:127.0.0.1:5433 usuario@traducesenas.tech» y luego un cliente como DBeaver contra localhost:5433.
 
 ## Pruebas de humo funcionales
 
@@ -458,7 +458,7 @@ Vista Logs del contenedor iam-service y del api-gateway con las últimas líneas
 
 ### Captura de respuesta HTTP 200 de los health checks
 
-Navegador o terminal con la respuesta de http://179.236.77.215:8080/health. En la verificación del 15 de octubre de 2026 el gateway respondió 200 con estado «degraded»: identidad, reconocimiento, léxico y analítica estaban arriba y profile-service no respondía. Antes de cerrar la ventana se revisa su log, se reinicia el contenedor y se repite la captura hasta obtener «ok».
+Navegador o terminal con la respuesta de https://traducesenas.tech/api/health. En la verificación del 15 de octubre de 2026 el gateway respondió 200 con estado «degraded»: identidad, reconocimiento, léxico y analítica estaban arriba y profile-service no respondía. Antes de cerrar la ventana se revisa su log, se reinicia el contenedor y se repite la captura hasta obtener «ok».
 
 ### Captura de interfaz web React con consola DevTools limpia
 

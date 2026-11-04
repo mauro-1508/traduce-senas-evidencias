@@ -32,11 +32,11 @@ El objetivo es que cualquier evaluador o nuevo integrante del equipo pueda ubica
 
 | **Repositorio** | **URL** | **Contenido** | **Rama de trabajo** |
 |---|---|---|---|
-| frontendTS | https://github.com/tadeo77789/frontendTS | Aplicación React Native / Expo (móvil, web y escritorio) | fix/traduccion-en-vivo |
-| backendTS | https://github.com/mauro-1508/backendTS | API Gateway, cinco microservicios y paquete compartido | feat/microservices-split |
+| frontendTS | https://github.com/tadeo77789/frontendTS | Aplicación React Native / Expo (móvil, web y escritorio) | main |
+| backendTS | https://github.com/mauro-1508/backendTS | API Gateway, cinco microservicios y paquete compartido | main |
 | trans-sl-docs | https://github.com/code-sena/trans-sl-docs | Documentación técnica, contratos OpenAPI y prototipos | main |
 
-*Nota.* Las ramas corresponden al estado del 7 de octubre de 2026. Los cambios se integran a main por pull request con squash and merge.
+*Nota.* Rama vigente: main en ambos repositorios, al 4 de noviembre de 2026 (backend versión 1.4.0, commit a962982; frontend versión 1.3.1, commit a5e231d). Los cambios se integran a main por pull request con squash and merge.
 
 # Artefacto cliente: aplicación multiplataforma
 
@@ -50,7 +50,7 @@ El cliente es una única base de código en TypeScript, construida con React Nat
 
 | **Destino** | **Forma de entrega** | **Requisitos del equipo del usuario** |
 |---|---|---|
-| Móvil (Android / iOS) | Aplicación nativa generada con Expo; en desarrollo se ejecuta con Expo Go | Android 9+ o iOS 14+, cámara |
+| Móvil (Android / iOS) | Aplicación nativa generada con Expo; en desarrollo se ejecuta con Expo Go | Android 7.0+ o iOS 15.1+, cámara |
 | Web | Sitio estático generado con «expo export --platform web» y servido por Nginx en un contenedor Docker | Navegador actualizado con acceso a cámara |
 | Escritorio | La misma aplicación web abierta en el navegador de un computador (Windows, macOS o Linux), con diseño adaptado a pantallas ≥ 1024 px | Computador con cámara web y navegador Chrome, Edge o Firefox |
 
@@ -104,7 +104,7 @@ frontend/
 
 | **Archivo** | **Función** |
 |---|---|
-| src/app/config/api.config.ts | URL base del backend. En desarrollo apunta todavía al puerto 3000 del backend anterior; debe cambiarse al 8080 del API Gateway. En producción usa /api (web) y https://api.traducsenas.com/api (móvil) |
+| src/app/config/api.config.ts | URL base del backend. Por defecto apunta a https://traducesenas.tech/api (VPS con Caddy y HTTPS); la variable EXPO_PUBLIC_API_URL la cambia al compilar, por ejemplo a http://localhost:8080/api para un backend local. La web en producción usa la ruta relativa /api |
 | feature/Translation/pages/TranslationScreen.tsx | Pantalla de traducción con selector Palabras / Abecedario |
 | feature/Translation/hooks/useSignAgent.ts, useGestureAgent.ts | Ciclo de captura, reconocimiento y publicación del resultado |
 | services/vision/mediapipeProvider(.web).ts | Obtiene los 21 puntos de la mano en cada cuadro |
@@ -114,7 +114,7 @@ frontend/
 | services/translations.service.ts | Guarda y consulta el historial en el backend |
 | feature/auth/services | Inicio de sesión real contra el backend y manejo del token |
 
-*Nota.* La versión actual del cliente es la 1.2.0. Cada pantalla web tiene su propia URL; las rutas de contraseña se renombraron. El perfil muestra el progreso del reto diario, el total de puntos de reto y una cola de avisos de retos completados y logros desbloqueados.
+*Nota.* La versión actual del cliente es la 1.3.1. Cada pantalla web tiene su propia URL; las rutas de contraseña se renombraron. El perfil muestra el progreso del reto diario, el total de puntos de reto y una cola de avisos de retos completados y logros desbloqueados.
 
 ## Dependencias principales
 
@@ -242,17 +242,17 @@ services/lexicon-service/
 
 | **Componente** | **Archivos .ts (src)** | **Líneas (src)** | **Archivos de prueba** |
 |---|---|---|---|
-| api-gateway | 7 | 265 | 1 |
-| iam-service | 77 | 2 094 | 22 |
-| recognition-service | 58 | 3 016 | 11 |
-| lexicon-service | 23 | 1 629 | 6 |
-| analytics-service | 13 | 487 | 4 |
-| profile-service | 20 | 823 | 4 |
-| @traduce/shared | 21 | 671 | 5 |
-| **Total backend** | **219** | **8 985** | **53** |
+| api-gateway | 7 | 265 | 3 |
+| iam-service | 77 | 2 094 | 33 |
+| recognition-service | 58 | 3 016 | 17 |
+| lexicon-service | 23 | 1 629 | 5 |
+| analytics-service | 13 | 487 | 6 |
+| profile-service | 20 | 823 | 27 |
+| @traduce/shared | 21 | 671 | 7 |
+| **Total backend** | **219** | **8 985** | **99** |
 | Cliente (frontend/src, .ts y .tsx) | 109 | 16 713 | — |
 
-*Nota.* Conteo realizado el 7 de octubre de 2026 sobre las ramas indicadas en la Tabla 1.
+*Nota.* Los archivos .ts de src y sus líneas corresponden al conteo del 7 de octubre de 2026. Los archivos de prueba corresponden al conteo del 4 de noviembre de 2026 en la rama main (91 en los servicios, 7 en @traduce/shared y 1 en la carpeta tests raíz).
 
 ## Interfaces expuestas
 
@@ -266,7 +266,7 @@ services/lexicon-service/
 | /api/users, /api/iam | iam-service | me, me/password, roles, asignación de roles a usuarios |
 | /api/translations | recognition-service | Guardar traducción, historial, borrado lógico |
 | /api/sign-templates, /api/samples, /api/recognition | recognition-service | Plantillas de señas y muestras de entrenamiento |
-| /api/lexicon | lexicon-service | alphabet, search, categories, señas, publicar, localizaciones, recursos |
+| /api/lexicon | lexicon-service | alfabeto, búsqueda, categorías, señas, publicación, localizaciones y recursos |
 | /api/analytics | analytics-service | events, summary, daily, top-signs, reports/sections |
 | /api/profile, /api/notifications, /api/achievements | profile-service | me, me/stats, notificaciones, logros, challenges/today y challenges/rewards/summary (retos diarios y puntos de reto) |
 
@@ -306,7 +306,7 @@ npx expo start --android     # o --ios; se abre en Expo Go
 
 npx eas build --platform android
 
-La configuración de EAS Build (eas.json) aún no está en el repositorio; se crea al generar el primer instalador de distribución.
+La configuración de EAS Build está en el archivo eas.json del repositorio del cliente.
 
 ## Aplicación web y de escritorio
 

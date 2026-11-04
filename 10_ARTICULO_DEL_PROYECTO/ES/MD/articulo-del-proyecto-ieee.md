@@ -4,7 +4,7 @@ Luis Alejandro Duarte Aldana, Juan Mauricio Suaza Solórzano y Juan Camilo Fierr
 
 *Tecnólogo en Análisis y Desarrollo de Software, Servicio Nacional de Aprendizaje (SENA), Colombia*
 
-*Resumen*—En Colombia la comunidad sorda cuenta con muy pocos intérpretes de Lengua de Señas Colombiana (LSC), y buena parte de sus trámites y conversaciones diarias depende de la buena voluntad de terceros. Este trabajo presenta Traduce Señas, una aplicación para teléfono y navegador que reconoce señas con la cámara y las convierte en texto y voz. El reconocimiento se hace en el propio dispositivo: se extraen los puntos de referencia de las manos, se normalizan y se comparan con plantillas mediante Dynamic Time Warping; cuando la coincidencia no es suficiente, la aplicación avisa en lugar de adivinar. El servidor se organizó en cinco microservicios con arquitectura hexagonal coordinados por eventos. La suite automatizada terminó con 494 pruebas aprobadas y ninguna fallida, el flujo principal se verificó de extremo a extremo y se cerraron los cuatro hallazgos críticos y altos de la auditoría de seguridad. En una medición preliminar con firmantes independientes del conjunto LSC-54, siete señas alcanzaron un 75 % de acierto con un 2 % de palabras equivocadas. Se discuten los límites del enfoque para señas que solo difieren en ubicación o movimiento.
+*Resumen*—En Colombia la comunidad sorda cuenta con muy pocos intérpretes de Lengua de Señas Colombiana (LSC), y buena parte de sus trámites y conversaciones diarias depende de la buena voluntad de terceros. Este trabajo presenta Traduce Señas, una aplicación para teléfono y navegador que reconoce señas con la cámara y las convierte en texto y voz. El reconocimiento se hace en el propio dispositivo: se extraen los puntos de referencia de las manos, se normalizan y se comparan con plantillas mediante Dynamic Time Warping; cuando la coincidencia no es suficiente, la aplicación avisa en lugar de adivinar. El servidor se organizó en cinco microservicios con arquitectura hexagonal coordinados por eventos. La suite automatizada del servidor terminó con 918 pruebas aprobadas y ninguna fallida, el flujo principal se verificó de extremo a extremo y se cerraron los cuatro hallazgos críticos y altos de la auditoría de seguridad. En una medición preliminar con firmantes independientes del conjunto LSC-54, siete señas alcanzaron un 75 % de acierto con un 2 % de palabras equivocadas. Se discuten los límites del enfoque para señas que solo difieren en ubicación o movimiento.
 
 Index Terms—lengua de señas colombiana, visión por computadora, MediaPipe, Dynamic Time Warping, microservicios, arquitectura hexagonal, accesibilidad
 
@@ -60,7 +60,7 @@ Newman [10] describe los microservicios como servicios pequeños, desplegables d
 
 El trabajo se gestionó con Scrum [12] en sprints de dos semanas, catorce en total entre enero y julio de 2026. El instructor hizo las veces de dueño del producto y aceptó cada incremento en la revisión de sprint, y lo que surgía en las retrospectivas se registró como acción de mejora. Una historia se daba por terminada cuando el código estaba revisado, las pruebas pasaban, la accesibilidad estaba verificada y la documentación se había actualizado.
 
-Los requisitos se especificaron según el estándar IEEE 830 [13]. Los once requisitos funcionales de alto nivel se desglosaron en 79 requisitos detallados (62 obligatorios, 12 deseables y 5 opcionales) y se trazaron hasta las historias de usuario, el modelo de datos y los casos de prueba. Se definieron además doce requisitos no funcionales, cada uno con una métrica de aceptación. La accesibilidad se trató como la primera restricción, porque los usuarios principales son personas sordas.
+Los requisitos se especificaron según el estándar IEEE 830 [13]. Se especificaron 88 requisitos funcionales (85 vigentes y 3 retirados) y 55 historias de usuario, trazadas hasta el modelo de datos y los casos de prueba. Se definieron además diez requisitos no funcionales, cada uno con una métrica de aceptación. La accesibilidad se trató como la primera restricción, porque los usuarios principales son personas sordas.
 
 ## Decisiones de Diseño
 
@@ -168,7 +168,7 @@ Se siguió la pirámide de pruebas. En la base, pruebas unitarias rápidas sobre
 
 ## Casos Funcionales
 
-Sobre los requisitos críticos se diseñaron dieciséis casos funcionales. Entre ellos están el registro con verificación de correo, el inicio de sesión según el estado de la cuenta, la recuperación de contraseña con un código vencido, el límite de peticiones, el control de roles sobre las plantillas, la privacidad del historial, la eliminación de la cuenta y el rechazo de muestras sin consentimiento.
+Sobre los requisitos críticos se diseñaron veinte casos funcionales. Entre ellos están el registro con verificación de correo, el inicio de sesión según el estado de la cuenta, la recuperación de contraseña con un código vencido, el límite de peticiones, el control de roles sobre las plantillas, la privacidad del historial, la eliminación de la cuenta y el rechazo de muestras sin consentimiento.
 
 ## Auditoría de Código y Seguridad
 
@@ -182,23 +182,23 @@ La precisión del reconocimiento no se valida con pruebas unitarias, así que se
 
 ## Pruebas Automatizadas
 
-La ejecución del 7 de octubre de 2026 terminó con 494 pruebas aprobadas, ninguna fallida ni omitida, repartidas en 115 suites y en 87 segundos. La Tabla II muestra cómo se distribuyen por componente.
+La ejecución del 4 de noviembre de 2026 terminó con 918 pruebas aprobadas y ninguna fallida; otras 13 se omitieron en el equipo local por requerir una base PostgreSQL. La ejecución del 7 de octubre había terminado con 494. La Tabla II muestra cómo se distribuyen por componente las pruebas del servidor; el cliente suma 469 pruebas Jest en 46 suites y tres pruebas de extremo a extremo con Playwright.
 
 Pruebas Automatizadas por Componente
 
 | Componente | Archivos | Aspectos verificados |
 |---|---|---|
-| @traduce/shared | 5 | Tokens, autorización, errores, contratos de eventos, reintentos y bus |
-| api-gateway | 1 | Enrutamiento por prefijo, CORS y rutas públicas |
-| iam | 22 | Registro y verificación, sesión según estado, recuperación, roles y borrado de cuenta |
-| recognition | 11 | Traducciones, historial, plantillas solo para ADMIN y muestras |
-| lexicon | 6 | Catálogo, alfabeto, búsqueda, categorías y publicación |
-| analytics | 4 | Registro de eventos y reportes |
-| profile | 4 | Perfil, preferencias, notificaciones y logros |
+| @traduce/shared | 7 | Tokens, autorización, errores, contratos de eventos, reintentos y bus |
+| api-gateway | 3 | Enrutamiento por prefijo, CORS y rutas públicas |
+| iam | 33 | Registro y verificación, sesión según estado, recuperación, roles y borrado de cuenta |
+| recognition | 17 | Traducciones, historial, plantillas solo para ADMIN y muestras |
+| lexicon | 5 | Catálogo, alfabeto, búsqueda, categorías y publicación |
+| analytics | 6 | Registro de eventos y reportes |
+| profile | 27 | Perfil, preferencias, notificaciones, logros y retos diarios |
 
 ## Casos Funcionales y Prueba de Extremo a Extremo
 
-De los dieciséis casos funcionales, trece se aprobaron y tres siguen pendientes: el registro sin aceptar los términos, que aún no tiene una prueba automatizada propia, y dos que exigen ejecución manual en un dispositivo (la seña no reconocida y la privacidad del historial). La prueba de extremo a extremo del 5 de octubre de 2026, con todos los contenedores en marcha, recorrió el registro, el inicio de sesión, una traducción, el desbloqueo del logro y el registro del evento de uso sin errores.
+De los veinte casos funcionales, quince se aprobaron y cinco siguen pendientes: el registro sin aceptar los términos, que aún no tiene una prueba automatizada propia; la vista del historial por sesiones y su URL propia, que tampoco tiene prueba; y tres que exigen revisión manual en un dispositivo (la seña no reconocida, la privacidad del historial y la retención de 30 días). La prueba de extremo a extremo del 5 de octubre de 2026, con todos los contenedores en marcha, recorrió el registro, el inicio de sesión, una traducción, el desbloqueo del logro y el registro del evento de uso sin errores.
 
 ## Seguridad y Defectos
 
@@ -281,7 +281,7 @@ El trabajo deja tres aportes: una aplicación funcional pensada para la comunida
 
 ## Trabajos Futuros
 
-A corto plazo se integrarán las pruebas en GitHub Actions para que ningún cambio entre con pruebas en rojo, se ejecutarán las pruebas de carga con k6 y se añadirán registros estructurados y métricas de latencia. En la siguiente versión el motor debe incorporar la posición de la mano respecto al cuerpo y su movimiento. Por último, la prueba piloto con usuarios sordos en una institución educativa es el paso que falta para cumplir el cuarto objetivo específico y medir el efecto real de la herramienta en la comunicación cotidiana.
+La integración continua con GitHub Actions ya corre en ambos repositorios. A corto plazo se ejecutarán las pruebas de carga con k6 y se añadirán registros estructurados y métricas de latencia. En la siguiente versión el motor debe incorporar la posición de la mano respecto al cuerpo y su movimiento. Por último, la prueba piloto con usuarios sordos en una institución educativa es el paso que falta para cumplir el cuarto objetivo específico y medir el efecto real de la herramienta en la comunicación cotidiana.
 
 ## Reflexión Final
 

@@ -22,7 +22,7 @@
 
 The design document translates the requirements and analysis of Traduce Señas into concrete construction decisions. It brings together four views: the graphical interfaces the user sees, the architectural model that organizes the components, the design patterns applied in the code, and the data model that supports the system's information.
 
-The decisions described here correspond to the code in the frontend and backend repositories (branch feat/microservices-split) and to the high-fidelity prototypes in the documentation repository.
+The decisions described here correspond to the code in the frontend and backend repositories (frontend 1.3.1 and backend 1.4.0) and to the high-fidelity prototypes in the documentation repository.
 
 # Graphical interface design
 
@@ -294,7 +294,7 @@ The following table summarizes the patterns applied, where they are used, and wh
 
 - **Relational data in PostgreSQL** and gesture samples in **MongoDB**, because their structure varies and their volume grows separately.
 
-- **Logical deletion** where the law or auditing requires it (history, anonymized accounts).
+- **Logical deletion** in the translation history (`is_deleted`); account deletion is physical, and the other services receive the iam.UserDeleted event.
 
 - **Database constraints** for critical rules: normalized and unique email, valid states, codes with attempts ≥ 0, one location per language.
 
@@ -333,7 +333,7 @@ The following table summarizes the patterns applied, where they are used, and wh
 |---|---|---|---|
 | token_id | SERIAL | PK | Identifier |
 | user_id | INT | FK users | Code owner |
-| token_type | VARCHAR(30) | EMAIL_VERIFICATION / PASSWORD_RESET | Code use |
+| token_type | VARCHAR(30) | EMAIL_VERIFICATION / PASSWORD_RESET / ACCOUNT_DELETION | Code use |
 | token_hash | VARCHAR(255) | NOT NULL | Hash of the code; never in plain text |
 | attempts | INT | ≥ 0 | Failed validation attempts |
 | expires_at / used_at | TIMESTAMPTZ | — | Expiration and single use |
@@ -358,7 +358,7 @@ The following table summarizes the patterns applied, where they are used, and wh
 |---|---|---|---|
 | template_id | SERIAL | PK | Identifier |
 | label | VARCHAR(80) | NOT NULL | Sign represented (letter or word) |
-| kind | VARCHAR(10) | static / motion | Static or motion sign |
+| kind | VARCHAR(10) | static / motion / word | Static, motion, or word sign (ADR-011) |
 | features | JSONB | NOT NULL | Normalized points of the template |
 
 **Table 10**
@@ -383,17 +383,17 @@ The following table summarizes the patterns applied, where they are used, and wh
 | usage_event | analytics | unique event_id | Usage event by section, type, and signs |
 | user_profiles | profile | logical PK user_id | User presentation data |
 | user_preferences | profile | ES/EN, LIGHT/DARK | Language, theme, and notifications |
-| notifications | profile | PUSH / EMAIL / IN_APP channel | Visual-only notifications |
-| achievements | profile | Meta > 0 | Achievement catalog and progress; since migration 010 it includes challenge-point medals |
-| challenges | profile | Active definitions ordered by code | Daily challenge catalog (TRANSLATE_1, 3, 5 and 8, worth 5, 10, 15 and 25 points) and their texts in Spanish, English, French and Portuguese |
+| notifications | profile | IN_APP / EMAIL channel (PUSH unused) | Visual-only notifications |
+| achievements | profile | Meta > 0 | Achievement catalog and progress; since migration 010 it includes challenge-point medals (ADR-010) |
+| challenges | profile | Active definitions ordered by code | Daily challenge catalog (TRANSLATE_1, 3, 5 and 8, worth 5, 10, 15 and 25 points; ADR-009) and their texts in Spanish, English, French and Portuguese |
 | user_challenges | profile | Unique per user and day | Snapshot of the challenge assigned to each user: target, progress and completion date |
 | challenge_rewards | profile | One per assignment | Challenge points actually granted; their sum feeds the medals |
 | admin_recipients, admin_report_runs | profile | One run per period | Recipients and control of the weekly and monthly email reports for administrators |
 | gesture_samples | recognition (MongoDB) | Mandatory consent | Training samples |
 
-The complete target model has 29 tables grouped into ten domains (identity, authorization, profile, lexicon, translation, AI, notifications, usage, gamification, and auditing) and is maintained in DBML format in the documentation repository (06-data/traduce_senas.dbml). The tables shown here are those that already have a migration in the code. The current profile migrations run from 001 to 010 (the last three: 008 admin reports, 009 daily challenges and 010 challenge-point medals).
+The code currently has 33 tables in PostgreSQL, spread across the five domain services, and one collection in MongoDB (gesture_samples). The complete reference model, with ten domains (identity, authorization, profile, lexicon, translation, AI, notifications, usage, gamification, and auditing), is maintained in DBML format in the documentation repository (06-data/traduce_senas.dbml). The tables shown here are those that already have a migration in the code. The current profile migrations run from 001 to 010 (the last three: 008 admin reports, 009 daily challenges and 010 challenge-point medals).
 
-Two recent design rules do not change tables. History translations are deleted after 30 days (recognition-service), and the app shows the history grouped by sessions, one card per session. Each web screen also has its own URL. Admin reports use the notification types ADMIN_WEEKLY_REPORT and ADMIN_MONTHLY_REPORT and are delivered by email (ADR-007). The daily challenge changes at midnight, Bogotá time, and only advances with saved translations.
+Two recent design rules do not change tables. History translations are deleted after 30 days (recognition-service), and the app shows the history grouped by sessions, one card per session. Each web screen also has its own URL. The weekly and monthly reports and the model reminder use the notification types ADMIN_WEEKLY_REPORT, ADMIN_MONTHLY_REPORT and ADMIN_MODEL_REMINDER, and are delivered as an in-app notice and by email (ADR-007). The daily challenge changes at midnight, Bogotá time, and only advances with saved translations.
 
 # Conclusions
 

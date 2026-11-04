@@ -10,7 +10,7 @@ Juan Camilo Fierro Esquivel
 
 Instructor: Karol Daniela Correa
 
-October 7, 2026
+November 4, 2026
 
 </div>
 
@@ -30,6 +30,7 @@ October 7, 2026
    - [5.3 Alphabet](#53-alphabet)
    - [5.4 History](#54-history)
    - [5.5 Profile](#55-profile)
+   - [5.6 Daily Challenges and Medals](#56-daily-challenges-and-medals)
 - [6. Known Limitations](#6-known-limitations)
 - [7. Your Data and Your Privacy](#7-your-data-and-your-privacy)
 - [8. If Something Goes Wrong](#8-if-something-goes-wrong)
@@ -49,6 +50,7 @@ What it does today:
 - Recognizes signs with the camera and turns them into **text**.
 - Reads the text **aloud**.
 - Saves what was translated in a **history** that you can view and delete.
+- Offers a **daily challenge** for translating and gives you **points** and **medals**.
 
 What it does **not** do (not in this version):
 
@@ -65,9 +67,9 @@ What it does **not** do (not in this version):
 | You need | Details |
 |----------|---------|
 | A device with a camera | A computer with a webcam, or a phone. |
-| A recent browser | **Word** translation works **only in the web version**. |
+| A recent browser or the phone app | Camera translation works in the web version. On a phone, **Words** mode opens inside the app and needs internet. |
 | Internet | The app downloads the recognition tools (MediaPipe; Zhang et al., 2020) from the internet when the camera opens. |
-| Camera permission | The browser asks for it the first time. You must accept it. |
+| Camera permission | The browser or the phone asks for it the first time. You must accept it. |
 | Good lighting | Light from the front or from above; avoid windows or lamps behind you. |
 | Good framing | Your whole hands must be visible, with space on both sides. |
 | An email address | To create the account and confirm it with a code. |
@@ -76,7 +78,7 @@ What it does **not** do (not in this version):
 
 ### 4.1 Opening the Application
 
-1. Open the address given to you by whoever manages the application. In a normal local installation it is `http://127.0.0.1:8080` (see the Installation manual).
+1. Open the address given to you by whoever manages the application. In a normal local installation it is `http://localhost:8081` with the development web app, or the public address of the application (see the Installation manual).
 2. You will see the home page with the **Sign up** and **Sign in** options. On the web there are also presentation pages (About us, translator demo and alphabet demo).
 
 **Figure 1**
@@ -89,7 +91,7 @@ What it does **not** do (not in this version):
 
 1. On the home page, tap **Sign up**.
 2. On **Create your Account**, enter your full name, your email address and a password.
-3. The application asks for a password of **at least 8 characters** that combines uppercase, lowercase, numbers and a symbol (this is a rule of the sign-up screen). The strength indicator tells you whether it is Weak, Medium or Strong.
+3. The password must have **at least 8 characters** and meet at least **three** of these four types: uppercase letters, lowercase letters, numbers and symbols. The strength indicator tells you whether it is Weak, Medium or Strong. To be Strong it needs 12 characters or more and all four types.
 4. Check **I accept the terms and conditions**. You cannot continue without it.
 5. Tap **Sign up**.
 
@@ -146,9 +148,9 @@ Possible messages:
 | "Confirm your email to continue" | The code from step 4.3 is missing. |
 | "Your account is blocked. Contact support." | An administrator blocked the account. |
 | "Could not reach the server..." | Check your internet connection or tell the administrator. |
-| "Your session has expired. Please sign in again." | A session lasts 1 day; sign in again. |
+| "Your session has expired. Please sign in again." | The session has a fixed length and does not renew by itself: sign in again. |
 
-> **The "Google" and "Facebook" buttons do not work yet.** They appear on the sign-in screen but are not connected. Sign in with email and password.
+> **Google and Facebook.** These buttons work when the application has that sign-in configured. If a button appears disabled or says it is not configured, sign in with email and password. With Google, if the account is new, the app asks you to accept the terms before creating it.
 
 To **sign out**: go to the **button with your name**, at the top right, and tap **Sign out**.
 
@@ -162,8 +164,8 @@ After signing in you will see the bottom bar (or top bar on wide screens) with t
 
 The **Translation** screen has two modes, which you choose with two buttons:
 
-- **Words**: recognizes complete LSC words. It is the default mode. **It only works in the web version.** On a phone you will see the notice "Gesture recognition is only available on the web version".
-- **Alphabet**: recognizes letters (fingerspelling).
+- **Words**: recognizes complete LSC words. It is the default mode. In the web version it uses the computer camera; on a phone it opens inside the app and needs internet.
+- **Alphabet**: recognizes letters (fingerspelling). **It only works in the web version.** On a phone you will see the notice "Sign recognition is not available on mobile yet. Use the web version to translate with the camera".
 
 **Figure 5**
 
@@ -174,7 +176,7 @@ The **Translation** screen has two modes, which you choose with two buttons:
 #### 5.1.1 Words Mode
 
 1. Choose **Words**.
-2. Tap **Start camera**. If the browser asks for permission, accept it.
+2. Tap **Start camera**. If the browser or the phone asks for permission, accept it.
 3. Wait for "Loading gesture model..." to finish (the first time takes longer).
 4. Stand in front of the camera with your hands in view. You will see "Show a sign to the camera".
 5. Make the **complete sign, clearly and calmly**. The screen shows "Signing…", "Analysing…".
@@ -193,7 +195,7 @@ If you see "Low confidence, try the sign again" or "Could not recognise", repeat
 
 #### 5.1.2 Alphabet Mode
 
-1. Choose **Alphabet** and tap **Start camera**.
+1. Choose **Alphabet** and tap **Start camera**. This mode works in the web version.
 2. Make the letter in front of the camera and hold it for a moment.
 3. The recognized letters are added to **Recognized text**.
 4. Use **Space** to separate words, **Delete** to remove the last letter and **Clear** to start over (the trash can deletes the confirmed signs of Words mode).
@@ -254,46 +256,44 @@ In **Profile** you can:
 |--------|--------------|
 | **Theme** (Light / Dark) | Changes the app colors. |
 | **App language** | Spanish, English, French or Portuguese. |
-| **Change password** | Opens the password change flow. **It does not change your real password yet** (the screens exist but are not connected to the server). |
+| **Change password** | Changes your password. It asks for the current one. If your account was created with Google and has no password, the app sends a code to your email so you can create one. |
 | **Terms and conditions** / **Privacy policy** | The app's legal texts. See the notice in section 7. |
 | **Achievements** | Medals showing your progress, including those earned with challenge points (see 5.6). |
 | **Sign out** | Leaves your account. |
-| **Delete account** | See the following notice. |
+| **Delete account** | Deletes your account and your data. See the following notice. |
 
 **Figure 10**
 
-*Profile of a Fictitious Account; the Figures at the Top Are Fixed Example Values*
+*Profile of a Fictitious Account; the Figures at the Top Are Example Values*
 
 ![Profile screen](capturas/usuario-10-perfil.png)
 
-> **"Delete account" does not delete anything yet.** Today it only shows a confirmation message; your account and your data **still exist**. If you need your data deleted, ask the person who manages the application (see section 7).
+> **Delete account permanently deletes your account.** The app asks for your password. If the account was created with Google and has no password, it sends a code to your email and asks for that code. Your account, your history and your progress are deleted. If you are the only administrator, the app does not let you delete the account.
 
-### 5.6 Daily challenges and medals
+### 5.6 Daily Challenges and Medals
 
 Every day the app gives you a translation challenge: save 1, 3, 5 or 8 translations. All users see the same challenge of the day, and it changes at midnight (Colombian time).
 
 - In the **Profile** you will see a card with your progress for the day. It updates every time you save a translation; only saved translations count.
 - When you complete the challenge you earn points (5, 10, 15 or 25, depending on the target) and a notice appears on screen. Points are counted only once.
-- The Profile shows four indicators, including the total of your challenge points, and they adapt to the screen size.
-- With the accumulated challenge points you unlock **medals** in **Achievements**. You will also see a notice when an achievement is unlocked.
-- If you turn notifications off in the Profile, you do not receive the notices, but your points and completed challenge are kept.
+- The Profile shows the total of your challenge points.
+- With the accumulated challenge points you unlock **medals** in **Achievements**. When you unlock one, a notice appears.
+- If you close a notice, your points and your completed challenge are saved just the same.
 
 ## 6. Known Limitations
 
 - **Short vocabulary.** The word model knows 54 words, plus the alphabet. It does not recognize anything else.
 - **Camera and light.** The model learned from people recorded in a studio. With a different camera, a different distance or poor light it may fail even if you make the sign correctly.
 - **It can be wrong.** Always check the text. Do not use the app as the only source in important situations.
-- **Words only on the web.** Words mode is not available on phones.
+- **Alphabet only on the web.** On a phone, Alphabet mode does not recognize signs with the camera. Words mode on a phone needs internet.
 - **One direction only.** Only from sign to text or speech.
-- **Password recovery** ("Forgot your password?"): the screens exist, but **today they do not send the code or change the password** from the interface. If you forget your password, ask the administrator for help.
-- **Google and Facebook:** buttons with no function.
 - **Statistics:** only administration staff can see them.
 
 ## 7. Your Data and Your Privacy
 
-- The app asks for the camera only to recognize signs. Recognition processing happens in your browser.
-- Your account data (name, email, protected password) and your translation history are stored.
-- Colombian law (Law 1581 of 2012 and Decree 1377 of 2013 (Decreto 1377 de 2013; Ley 1581 de 2012)) gives you the right to know, correct and request the deletion of your data. Since the **Delete account** button does not work yet, today that right is handled **by asking the administration team**.
+- The app asks for the camera only to recognize signs. Recognition is processed on your device, inside the browser or the app.
+- Your account data (name, email, protected password), your translation history and your challenge and achievement progress are stored. Translations are deleted automatically 30 days after they are saved.
+- Colombian law (Law 1581 of 2012 and Decree 1377 of 2013) gives you the right to know, correct and request the deletion of your data. You can do it yourself from **Profile**, with **Delete account**. Deletion is permanent.
 - The privacy texts shown by the app have not been checked against how this version actually works; this manual does not repeat their claims.
 
 ## 8. If Something Goes Wrong
@@ -304,12 +304,13 @@ Every day the app gives you a translation challenge: save 1, 3, 5 or 8 translati
 
 | Problem | What to do |
 |---------|------------|
-| The camera does not turn on | Accept the camera permission in the browser (padlock icon next to the address). Close other applications that use the camera. |
+| The camera does not turn on | Accept the camera permission in the browser (padlock icon next to the address) or on the phone. Close other applications that use the camera. |
 | "Loading model..." never finishes | Check your internet connection and reload the page. |
 | It does not recognize the sign | More light, hands centered, repeat calmly. Move a little further away or closer. |
 | The code does not arrive by email | Check spam; wait 60 s and use **Resend**. Maximum 5 per hour. |
 | "Incorrect or expired code" | Request a new code and use it within 15 minutes. |
 | "Your session has expired" | Sign in again. |
+| The Google or Facebook button does nothing | That sign-in is not configured in the app. Sign in with email and password. |
 | The app does not open | Tell the administrator: the service may be down. |
 
 ## 9. Minimal Glossary
@@ -325,7 +326,7 @@ Every day the app gives you a translation challenge: save 1, 3, 5 or 8 translati
 | **Alphabet / fingerspelling** | Spelling with the hands, letter by letter. |
 | **Confidence** | How sure the app is about what it recognized. |
 | **History** | The list of your saved translations. |
-| **Session** | The time you are signed in to your account (it lasts 1 day). |
+| **Session** | The time you are signed in to your account. It has a fixed length and does not renew by itself. |
 | **Certified interpreter** | An accredited LSC professional. This app does not replace one. |
 
 ## References

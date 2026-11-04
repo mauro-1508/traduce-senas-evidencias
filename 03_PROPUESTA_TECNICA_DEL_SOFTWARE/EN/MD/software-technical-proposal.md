@@ -58,13 +58,15 @@ A cross-platform application is proposed that uses the device's camera to recogn
 
 | **Module** | **Functionality** | **Service** |
 |---|---|---|
-| User management | Registration, email verification, login, password recovery, roles | iam-service |
+| User management | Registration, email verification, login (also with Google and Facebook), password recovery, roles, and account deletion | iam-service |
 | Translation | Sign recognition, text and voice, history | App + recognition-service |
 | Training | Sample capture, sign templates, model registration | recognition-service |
 | Lexicon and alphabet | Sign catalog, categories, alphabet with 3D models | lexicon-service |
-| Profile | Personal data, theme, language, notifications, and achievements | profile-service |
+| Profile | Personal data, theme, language, notifications (also weekly and monthly reports by email to administrators), achievements, and daily challenges | profile-service |
 | Statistics | Usage events and dashboards for the administrator | analytics-service |
 | Single entry point | Routing, JWT validation, rate limiting, CORS | api-gateway |
+
+Out of scope: reverse translation (from text or voice to signs), full coverage of the LSC vocabulary, and offline use.
 
 # Selected technologies
 
@@ -81,7 +83,7 @@ A cross-platform application is proposed that uses the device's camera to recogn
 | Vision | TensorFlow.js | 4.22 | Execution of classification models on the client |
 | Voice | expo-speech | 57.x | Native speech synthesis for audio output |
 | Backend | Node.js + Express | 20 LTS / 5.2 | Same language as the client; sufficient for the project's traffic |
-| Backend | TypeScript | 5.6+ | Static typing that reduces errors in a shared codebase |
+| Backend | TypeScript | 5.6+ (server) and 6.0 (client) | Static typing that reduces errors in a shared codebase |
 | Data | PostgreSQL | 16 | Robust, free relational database, one per service |
 | Data | MongoDB | 7 | Flexible documents for the training samples |
 | Messaging | RabbitMQ | 3.x | Event exchange between services; simple and with a web panel |
@@ -155,9 +157,9 @@ The project is managed with Scrum (Schwaber & Sutherland, 2020) in two-week spri
 
 | **Name** | **Role** | **Responsibility** | **Contact** |
 |---|---|---|---|
-| Juan Mauricio Suaza Solórzano | Technical lead, Scrum Master, analyst and developer | Analysis, design, backend programming (lexicon and recognition), and coordination | suazasolorzano@gmail.com |
-| Luis Alejandro Duarte Aldana | Analyst and developer | Analysis, interface design, and programming | aleosea777@gmail.com |
-| Juan Camilo Fierro Esquivel | Analyst and developer | Analysis, product documentation, and programming | fierroesquiveljuancamilo@gmail.com |
+| Juan Mauricio Suaza Solórzano | Technical lead, Scrum Master, analyst and developer | Analysis, design, backend programming (lexicon and recognition), and coordination | Through the training programme |
+| Luis Alejandro Duarte Aldana | Analyst and developer | Analysis, interface design, and programming | Through the training programme |
+| Juan Camilo Fierro Esquivel | Analyst and developer | Analysis, product documentation, and programming | Through the training programme |
 
 *Note.* Apprentices from the Technologist in Software Analysis and Development program at SENA.
 
